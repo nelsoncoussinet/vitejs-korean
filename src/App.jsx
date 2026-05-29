@@ -173,7 +173,7 @@ export default function App() {
     return gramData[gramData.length - 1].id;
   };
 
-const sendMsg = async (override) => {
+const sendMessage = async (override) => {
     const text = override || input.trim();
     if (!text && !photoB64) return;
     const newChat = [...chat, { role:"user", content: text||"Analyse cette photo." }];
