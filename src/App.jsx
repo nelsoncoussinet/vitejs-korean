@@ -147,22 +147,30 @@ export default function App() {
     } catch (e) { showMsg("Erreur chargement grammaire: " + e.message, "error"); }
   };
 
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPhoto(url);
-    const b64 = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result.split(",")[1]);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
-    setPhotoB64(b64);
-    setChatHistory([]);
-    setPendingData(null);
-  };
-
+const handlePhotoUpload = async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  setPhoto(URL.createObjectURL(file));
+  
+  const b64 = await new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxSize = 1024;
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = h * maxSize / w; w = maxSize; }
+        else { w = w * maxSize / h; h = maxSize; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      res(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+  
+  setPhotoB64(b64); setChatHistory([]); setPendingData(null);
+};
   const getLastVocabId = () => {
     if (!vocabData.length) return "V0000";
     return vocabData[vocabData.length - 1].id;
