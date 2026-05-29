@@ -173,20 +173,25 @@ export default function App() {
     return gramData[gramData.length - 1].id;
   };
 
-const sendMessage = async (override) => {
-    const text = override || input.trim();
+const sendMessage = async (overrideText) => {
+    const text = overrideText || userInput.trim();
     if (!text && !photoB64) return;
-    const newChat = [...chat, { role:"user", content: text||"Analyse cette photo." }];
-    setChat(newChat); setInput(""); setAnalyzing(true);
+
+    const newMsg = { role: "user", content: text || "Analyse cette photo." };
+    const updatedHistory = [...chatHistory, newMsg];
+    setChatHistory(updatedHistory);
+    setUserInput("");
+    setAnalyzing(true);
+
     try {
       const lastVocabId = vocabData.length ? vocabData[vocabData.length-1].id : "V0000";
       const lastGramId  = gramData.length  ? gramData[gramData.length-1].id   : "G0000";
-      
+
       const parts = [];
       if (photoB64) parts.push({ inlineData: { mimeType: "image/jpeg", data: photoB64 }});
-      parts.push({ text: `${text||"Analyse cette photo."}\n\nDernier ID vocab en DB: ${lastVocabId}\nDernier ID gram en DB: ${lastGramId}\nVocab existant: ${vocabData.map(v=>v.mot).join(", ")||"aucun"}\nGram existante: ${gramData.map(g=>g.id+":"+g.grammaire).join(", ")||"aucune"}` });
+      parts.push({ text: `${text}\n\nDernier ID vocab en DB: ${lastVocabId}\nDernier ID gram en DB: ${lastGramId}\nVocab existant: ${vocabData.map(v=>v.mot).join(", ")||"aucun"}\nGram existante: ${gramData.map(g=>g.id+":"+g.grammaire).join(", ")||"aucune"}` });
 
-      const history = newChat.slice(0,-1).map(m => ({
+      const history = updatedHistory.slice(0,-1).map(m => ({
         role: m.role === "user" ? "user" : "model",
         parts: [{ text: m.content }]
       }));
@@ -204,11 +209,14 @@ const sendMessage = async (override) => {
       const full = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur : pas de réponse";
       const jsonMatch = full.match(/```json\n([\s\S]*?)```/);
       if (jsonMatch) { try { setPendingData(JSON.parse(jsonMatch[1])); } catch(_){} }
-      const display = full.replace(/```json[\s\S]*?```/g,"").trim();
-      setChat([...newChat, {role:"assistant", content:display}]);
-      setTimeout(()=>bottomRef.current?.scrollIntoView({behavior:"smooth"}),100);
-    } catch(e) { flash("Erreur API: "+e.message,"error"); }
-    finally { setAnalyzing(false); }
+      const displayText = full.replace(/```json[\s\S]*?```/g,"").trim();
+      setChatHistory([...updatedHistory, { role: "assistant", content: displayText }]);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    } catch(e) {
+      showMsg("Erreur API: " + e.message, "error");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const importToSupabase = async () => {
