@@ -173,61 +173,42 @@ export default function App() {
     return gramData[gramData.length - 1].id;
   };
 
-  const sendMessage = async (overrideText) => {
-    const text = overrideText || userInput.trim();
+const sendMsg = async (override) => {
+    const text = override || input.trim();
     if (!text && !photoB64) return;
-
-    const newMsg = { role: "user", content: text || "Analyse cette photo." };
-    const updatedHistory = [...chatHistory, newMsg];
-    setChatHistory(updatedHistory);
-    setUserInput("");
-    setAnalyzing(true);
-
+    const newChat = [...chat, { role:"user", content: text||"Analyse cette photo." }];
+    setChat(newChat); setInput(""); setAnalyzing(true);
     try {
-      const messages = updatedHistory.map((m, i) => {
-        if (i === 0 && photoB64) {
-          return {
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: "image/jpeg", data: photoB64 } },
-              { type: "text", text: `${m.content}\n\nDernier ID vocabulaire en DB: ${getLastVocabId()}\nDernier ID grammaire en DB: ${getLastGramId()}\n\nVocabulaire existant en DB (pour déduplication): ${vocabData.map(v => v.mot).join(", ") || "aucun"}\nGrammaire existante en DB: ${gramData.map(g => `${g.id}:${g.grammaire}`).join(", ") || "aucune"}` }
-            ]
-          };
-        }
-        return { role: m.role, content: m.content };
-      });
+      const lastVocabId = vocabData.length ? vocabData[vocabData.length-1].id : "V0000";
+      const lastGramId  = gramData.length  ? gramData[gramData.length-1].id   : "G0000";
+      
+      const parts = [];
+      if (photoB64) parts.push({ inlineData: { mimeType: "image/jpeg", data: photoB64 }});
+      parts.push({ text: `${text||"Analyse cette photo."}\n\nDernier ID vocab en DB: ${lastVocabId}\nDernier ID gram en DB: ${lastGramId}\nVocab existant: ${vocabData.map(v=>v.mot).join(", ")||"aucun"}\nGram existante: ${gramData.map(g=>g.id+":"+g.grammaire).join(", ")||"aucune"}` });
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const history = newChat.slice(0,-1).map(m => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: m.content }]
+      }));
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
-          system: SKILL_PROMPT,
-          messages,
-        }),
+          system_instruction: { parts: [{ text: SKILL_PROMPT }] },
+          contents: [...history, { role: "user", parts }]
+        })
       });
 
       const data = await res.json();
-      const fullText = data.content.map(b => b.text || "").join("\n");
-
-      // Extraire le JSON structuré si présent
-      const jsonMatch = fullText.match(/```json\n([\s\S]*?)```/);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[1]);
-          setPendingData(parsed);
-        } catch (_) {}
-      }
-
-      const displayText = fullText.replace(/```json[\s\S]*?```/g, "").trim();
-      setChatHistory([...updatedHistory, { role: "assistant", content: displayText }]);
-      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    } catch (e) {
-      showMsg("Erreur Claude API: " + e.message, "error");
-    } finally {
-      setAnalyzing(false);
-    }
+      const full = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur : pas de réponse";
+      const jsonMatch = full.match(/```json\n([\s\S]*?)```/);
+      if (jsonMatch) { try { setPendingData(JSON.parse(jsonMatch[1])); } catch(_){} }
+      const display = full.replace(/```json[\s\S]*?```/g,"").trim();
+      setChat([...newChat, {role:"assistant", content:display}]);
+      setTimeout(()=>bottomRef.current?.scrollIntoView({behavior:"smooth"}),100);
+    } catch(e) { flash("Erreur API: "+e.message,"error"); }
+    finally { setAnalyzing(false); }
   };
 
   const importToSupabase = async () => {
