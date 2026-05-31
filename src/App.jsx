@@ -10,6 +10,8 @@ const SUPA_HEADERS = {
   Prefer: "return=representation",
 };
 
+const isMobile = window.innerWidth < 768;
+
 const SKILL_PROMPT = `Tu es un assistant spécialisé dans l'apprentissage du coréen. Tu analyses des photos de manuel scolaire (살아있는 한국어 niveaux 1-6) et structures les données.
 
 ÉTAPE 1 — Identifier le type de contenu parmi : texte | vocabulaire | texte+vocabulaire | grammaire | expressions (쓰기/읽기). Si ambiguïté, demande confirmation. Si image floue, demande une nouvelle photo.
@@ -481,7 +483,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#fafafa" }}>
-                  {["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""].map(h => (
+                  {(isMobile ? ["Mot", "FR", "EN", ""] : ["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""]).map(h => (
                     <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 500, fontSize: 12, color: "#888", borderBottom: "1px solid #e0e0e0", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -500,12 +502,12 @@ export default function App() {
                     return (
                       <tr key={r.id} style={{ background: rowBg }}>
                         <td style={{ ...td, fontWeight: 600, fontSize: 15, whiteSpace: "nowrap" }}>{r.mot}</td>
-                        <td style={td}><Badge value={r.type} /></td>
+                        {!isMobile && <td style={td}><Badge value={r.type} /></td>}
                         <td style={td}>{r.fr || "—"}</td>
                         <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
-                        <td style={td}><TopikBadge v={r.topik_objectif} /></td>
-                        <td style={td}><MultiTag val={r.usage} /></td>
-                        <td style={td}><MultiTag val={r.theme} /></td>
+                        {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} /></td>}
+                        {!isMobile && <td style={td}><MultiTag val={r.usage} /></td>}
+                        {!isMobile && <td style={td}><MultiTag val={r.theme} /></td>}
                         <td style={td}>
                           <div style={{ display: "flex", gap: 4 }}>
                             <button style={{ ...btnStyle(), padding: "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)}>↻</button>
@@ -588,7 +590,7 @@ export default function App() {
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
       <div style={{ textAlign: "center", fontSize: 11, color: "#bbb", marginTop: "2rem" }}>
-        {__APP_VERSION__  || "dev"}
+        {__APP_VERSION__ || "dev"}
       </div>
     </div>
   );
