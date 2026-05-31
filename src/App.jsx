@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 const SUPA_URL = "https://bfsieishsrhshjmijwtx.supabase.co/rest/v1";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmc2llaXNoc3Joc2hqbWlqd3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NjU1MjYsImV4cCI6MjA5NTU0MTUyNn0.XPSzYvtaVPwdE9t5kotyh3HKNs2PSgamBNZhntUT2TE";
@@ -9,8 +9,6 @@ const SUPA_HEADERS = {
   Authorization: `Bearer ${ANON_KEY}`,
   Prefer: "return=representation",
 };
-
-const isMobile = window.innerWidth < 768;
 
 const SKILL_PROMPT = `Tu es un assistant spécialisé dans l'apprentissage du coréen. Tu analyses des photos de manuel scolaire (살아있는 한국어 niveaux 1-6) et structures les données.
 
@@ -131,6 +129,9 @@ export default function App() {
   const [gramFilterStatut, setGramFilterStatut] = useState("");
   const fileRef = useRef();
   const chatEndRef = useRef();
+  const [tableZoom, setTableZoom] = useState(1);
+  const tableRef = useRef();
+  const isMobile = window.innerWidth < 768;
 
   const showMsg = (text, type = "success") => {
     setMsg({ text, type });
@@ -306,6 +307,13 @@ export default function App() {
     return true;
   });
 
+  useEffect(() => {
+    if (!isMobile || !tableRef.current || tab !== "vocab") return;
+    const tableWidth = tableRef.current.scrollWidth;
+    const screenWidth = window.innerWidth;
+    setTableZoom(screenWidth / tableWidth);
+  }, [vocabData, tab]);
+
   const tabStyle = (t) => ({
     padding: "8px 16px", fontSize: 13, cursor: "pointer", border: "none",
     background: "none", borderBottom: tab === t ? "2px solid #1a1a1a" : "2px solid transparent",
@@ -450,7 +458,7 @@ export default function App() {
       {/* TAB VOCABULAIRE */}
       {tab === "vocab" && (
         <div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: "1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 12, marginBottom: "1.5rem" }}>
             {[
               ["Total", vocabData.length],
               ["Maîtrisés", vocabData.filter(r => r.statut === "maîtrisé").length],
@@ -479,8 +487,8 @@ export default function App() {
             </select>
             <button style={btnStyle()} onClick={loadVocab}>↺ Actualiser</button>
           </div>
-          <div style={{ overflowX: "auto", border: "1px solid #e0e0e0", borderRadius: 10 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <div style={{ zoom: isMobile ? tableZoom : 1, overflowX: "hidden", overflowY: "auto", border: "1px solid #e0e0e0", borderRadius: 10 }}>
+            <table ref={tableRef} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#fafafa" }}>
                   {(isMobile ? ["Mot", "FR", "EN", ""] : ["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""]).map(h => (
