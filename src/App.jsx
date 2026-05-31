@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 
 const SUPA_URL = "https://bfsieishsrhshjmijwtx.supabase.co/rest/v1";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmc2llaXNoc3Joc2hqbWlqd3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NjU1MjYsImV4cCI6MjA5NTU0MTUyNn0.XPSzYvtaVPwdE9t5kotyh3HKNs2PSgamBNZhntUT2TE";
@@ -129,8 +129,6 @@ export default function App() {
   const [gramFilterStatut, setGramFilterStatut] = useState("");
   const fileRef = useRef();
   const chatEndRef = useRef();
-  const [tableZoom, setTableZoom] = useState(1);
-  const tableRef = useRef();
   const isMobile = window.innerWidth < 768;
 
   const showMsg = (text, type = "success") => {
@@ -307,15 +305,6 @@ export default function App() {
     return true;
   });
 
-  useEffect(() => {
-    if (!isMobile || !tableRef.current || tab !== "vocab") return;
-    setTimeout(() => {
-      const tableWidth = tableRef.current.scrollWidth;
-      const screenWidth = window.innerWidth;
-      setTableZoom(screenWidth / tableWidth);
-    }, 100);
-  }, [vocabData, tab]);
-
   const tabStyle = (t) => ({
     padding: "8px 16px", fontSize: 13, cursor: "pointer", border: "none",
     background: "none", borderBottom: tab === t ? "2px solid #1a1a1a" : "2px solid transparent",
@@ -473,7 +462,7 @@ export default function App() {
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: "1rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: "1rem", flexWrap: isMobile ? "nowrap" : "wrap", flexDirection: isMobile ? "column" : "row" }}>
             <input value={vocabSearch} onChange={e => setVocabSearch(e.target.value)} placeholder="Rechercher..." style={{ flex: 1, minWidth: 140, padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }} />
             <select value={vocabFilterUsage} onChange={e => setVocabFilterUsage(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
               <option value="">Tous usages</option>
@@ -489,8 +478,8 @@ export default function App() {
             </select>
             <button style={btnStyle()} onClick={loadVocab}>↺ Actualiser</button>
           </div>
-          <div style={{ zoom: isMobile ? tableZoom : 1, overflowX: "hidden", overflowY: "auto", border: "1px solid #e0e0e0", borderRadius: 10 }}>
-            <table ref={tableRef} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <div style={{ fontSize: isMobile ? 12 : 14, overflowX: "hidden", overflowY: "auto", border: "1px solid #e0e0e0", borderRadius: 10 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#fafafa" }}>
                   {(isMobile ? ["Mot", "FR", "EN", ""] : ["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""]).map(h => (
