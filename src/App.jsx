@@ -315,6 +315,8 @@ export default function App() {
     display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
   });
 
+  const td = { padding: "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
+
   return (
     <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", maxWidth: 1100, margin: "0 auto", padding: "1rem" }}>
       <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -471,7 +473,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#fafafa" }}>
-                  {["ID", "Mot", "Type", "FR", "EN", "Niveau", "TOPIK", "Usage", "Thème", "Statut", ""].map(h => (
+                  {["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""].map(h => (
                     <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 500, fontSize: 12, color: "#888", borderBottom: "1px solid #e0e0e0", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -489,18 +491,17 @@ export default function App() {
                     const rowBg = statutColors[r.statut] || "transparent";
                     return (
                       <tr key={r.id} style={{ background: rowBg }}>
-                        <td style={{ ...td, whiteSpace: "nowrap" }}>{r.mot}</td>
+                        <td style={{ ...td, fontWeight: 600, fontSize: 15, whiteSpace: "nowrap" }}>{r.mot}</td>
                         <td style={td}><Badge value={r.type} /></td>
                         <td style={td}>{r.fr || "—"}</td>
                         <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
-                        <td style={td}><Badge value={r.niveau_reel} /></td>
+                        <td style={td}><TopikBadge v={r.topik_objectif} /></td>
                         <td style={td}><MultiTag val={r.usage} /></td>
                         <td style={td}><MultiTag val={r.theme} /></td>
-                        <td style={{ ...td, maxWidth: 200 }}>{r.exemple || "—"}</td>
                         <td style={td}>
                           <div style={{ display: "flex", gap: 4 }}>
-                            <button style={{ ...btnStyle(), padding: "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)} title="Changer le statut">↻</button>
-                            <button style={{ ...btnStyle("danger"), padding: "3px 8px", fontSize: 13 }} onClick={() => deleteEntry("vocabulaire", r.id)} title="Supprimer ce mot">🗑️</button>
+                            <button style={{ ...btnStyle(), padding: "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)}>↻</button>
+                            <button style={{ ...btnStyle("danger"), padding: "3px 8px", fontSize: 13 }} onClick={() => deleteEntry("vocabulaire", r.id)}>🗑️</button>
                           </div>
                         </td>
                       </tr>
