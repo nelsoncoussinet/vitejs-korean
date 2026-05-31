@@ -309,9 +309,11 @@ export default function App() {
 
   useEffect(() => {
     if (!isMobile || !tableRef.current || tab !== "vocab") return;
-    const tableWidth = tableRef.current.scrollWidth;
-    const screenWidth = window.innerWidth;
-    setTableZoom(screenWidth / tableWidth);
+    setTimeout(() => {
+      const tableWidth = tableRef.current.scrollWidth;
+      const screenWidth = window.innerWidth;
+      setTableZoom(screenWidth / tableWidth);
+    }, 100);
   }, [vocabData, tab]);
 
   const tabStyle = (t) => ({
