@@ -72,7 +72,7 @@ async function supabase(path, method = "GET", body = null) {
   return text ? JSON.parse(text) : [];
 }
 
-function Badge({ value, color = "gray" }) {
+function Badge({ value, color = "gray", small = false }) {
   const colors = {
     gray: "background:#f1efe8;color:#5f5e5a",
     blue: "background:#e6f1fb;color:#0c447c",
@@ -87,22 +87,23 @@ function Badge({ value, color = "gray" }) {
       {value}
     </span>
   );
+  padding: small ? "1px 4px" : "2px 8px"
 }
 
 function MultiTag({ val }) {
   if (!val) return <span style={{ color: "#999" }}>—</span>;
-  return <>{val.split("|").map((v, i) => <Badge key={i} value={v.trim()} />)}</>;
+  return <>{val.split("|").map((v, i) => <Badge key={i} value={v.trim()} small={isMobile}/>)}</>;
 }
 
 function TopikBadge({ v }) {
   if (!v) return null;
   const color = v <= 2 ? "green" : v <= 4 ? "blue" : v <= 6 ? "amber" : "purple";
-  return <Badge value={`T${v}`} color={color} />;
+  return <Badge value={`T${v}`} color={color} small={isMobile}/>;
 }
 
 function StatutBadge({ s }) {
   const colors = { inconnu: "gray", "à apprendre": "amber", reconnu: "blue", utilisable: "purple", maîtrisé: "green" };
-  return <Badge value={s || "—"} color={colors[s] || "gray"} />;
+  return <Badge value={s || "—"} color={colors[s] || "gray"} small={isMobile}/>;
 }
 
 const STATUTS = ["inconnu", "à apprendre", "reconnu", "utilisable", "maîtrisé"];
@@ -320,7 +321,7 @@ export default function App() {
     display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
   });
 
-  const td = { padding: "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
+  const td = { padding: isMobile ? "6px 4px" : "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
 
   return (
     <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", maxWidth: 1100, margin: "0 auto", padding: "1rem", overflowX: "hidden", maxWidth: "100vw" }}>
@@ -501,16 +502,16 @@ export default function App() {
                     return (
                       <tr key={r.id} style={{ background: rowBg }}>
                         <td style={{ ...td, fontWeight: 600, fontSize: 15, whiteSpace: "nowrap" }}>{r.mot}</td>
-                        {!isMobile && <td style={td}><Badge value={r.type} /></td>}
+                        {!isMobile && <td style={td}><Badge value={r.type} small={isMobile}/></td>}
                         <td style={td}>{r.fr || "—"}</td>
                         <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
-                        {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} /></td>}
-                        {!isMobile && <td style={td}><MultiTag val={r.usage} /></td>}
-                        {!isMobile && <td style={td}><MultiTag val={r.theme} /></td>}
+                        {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} small={isMobile}/></td>}
+                        {!isMobile && <td style={td}><MultiTag val={r.usage} small={isMobile}/></td>}
+                        {!isMobile && <td style={td}><MultiTag val={r.theme} small={isMobile}/></td>}
                         <td style={td}>
                           <div style={{ display: "flex", gap: 4 }}>
-                            <button style={{ ...btnStyle(), padding: "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)}>↻</button>
-                            <button style={{ ...btnStyle("danger"), padding: "3px 8px", fontSize: 13 }} onClick={() => deleteEntry("vocabulaire", r.id)}>🗑️</button>
+                            <button style={{ ...btnStyle(), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)}>↻</button>
+                            <button style={{ ...btnStyle("danger"), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 13 }} onClick={() => deleteEntry("vocabulaire", r.id)}>🗑️</button>
                           </div>
                         </td>
                       </tr>
@@ -566,13 +567,13 @@ export default function App() {
                   <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                     <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: "#aaa" }}>{r.id}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: 15 }}>{r.grammaire}</td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} /></td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} /></td>
+                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} small={isMobile}/></td>
+                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} small={isMobile}/></td>
                     <td style={{ padding: "10px 12px", maxWidth: 200, fontSize: 12, color: "#555" }}>{r.definition_fr || "—"}</td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} /></td>
-                    <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} /></td>
-                    <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} /></td>
-                    <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} /></td>
+                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} small={isMobile}/></td>
+                    <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} small={isMobile}/></td>
+                    <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} small={isMobile}/></td>
+                    <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} small={isMobile}/></td>
                     <td style={{ padding: "10px 12px" }}>
                       <div style={{ display: "flex", gap: 4 }}>
                         <button style={{ ...btnStyle(), padding: "4px 8px", fontSize: 11 }} onClick={() => changeStatut("grammaire", r.id, r.statut)} title="Changer statut">↻</button>
