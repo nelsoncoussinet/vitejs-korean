@@ -572,7 +572,7 @@ const sendMessage = async (overrideText) => {
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
       <div style={{textAlign:"center",fontSize:11,color:"#bbb",marginTop:"2rem"}}>
-        v{import.meta.env.VITE_GIT_COMMIT_SHA || "dev"}
+        V{__APP_VERSION__}
       </div>
     </div>
   );
