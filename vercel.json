@@ -1,7 +1,0 @@
-{
-  "build": {
-    "env": {
-      "VITE_GIT_COMMIT_SHA": "$VERCEL_GIT_COMMIT_SHA"
-    }
-  }
-}
