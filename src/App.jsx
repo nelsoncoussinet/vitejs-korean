@@ -10,6 +10,7 @@ const SUPA_HEADERS = {
   Prefer: "return=representation",
 };
 
+const isMobile = window.innerWidth < 768;
 const SKILL_PROMPT = `Tu es un assistant spécialisé dans l'apprentissage du coréen. Tu analyses des photos de manuel scolaire (살아있는 한국어 niveaux 1-6) et structures les données.
 
 ÉTAPE 1 — Identifier le type de contenu parmi : texte | vocabulaire | texte+vocabulaire | grammaire | expressions (쓰기/읽기). Si ambiguïté, demande confirmation. Si image floue, demande une nouvelle photo.
@@ -130,7 +131,6 @@ export default function App() {
   const [gramFilterStatut, setGramFilterStatut] = useState("");
   const fileRef = useRef();
   const chatEndRef = useRef();
-  const isMobile = window.innerWidth < 768;
 
   const showMsg = (text, type = "success") => {
     setMsg({ text, type });
