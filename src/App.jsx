@@ -121,6 +121,7 @@ export default function App() {
   const [pendingData, setPendingData] = useState(null);
   const [importing, setImporting] = useState(false);
   const [vocabSearch, setVocabSearch] = useState("");
+  const [vocabFilterUsage, setVocabFilterUsage] = useState("");
   const [vocabFilterTopik, setVocabFilterTopik] = useState("");
   const [vocabFilterStatut, setVocabFilterStatut] = useState("");
   const [gramSearch, setGramSearch] = useState("");
@@ -286,8 +287,11 @@ export default function App() {
     } catch (e) { showMsg("Erreur: " + e.message, "error"); }
   };
 
+  const allUsages = [...new Set(vocabData.flatMap(r => r.usage ? r.usage.split("|").map(t => t.trim()) : []))].sort();
+
   const filteredVocab = vocabData.filter(r => {
     if (vocabSearch && !r.mot?.toLowerCase().includes(vocabSearch.toLowerCase()) && !r.fr?.toLowerCase().includes(vocabSearch.toLowerCase())) return false;
+    if (vocabFilterUsage && !r.usage?.split("|").map(t => t.trim()).includes(vocabFilterUsage)) return false;
     if (vocabFilterTopik && String(r.topik_objectif) !== vocabFilterTopik) return false;
     if (vocabFilterStatut && r.statut !== vocabFilterStatut) return false;
     return true;
@@ -459,6 +463,10 @@ export default function App() {
           </div>
           <div style={{ display: "flex", gap: 8, marginBottom: "1rem", flexWrap: "wrap" }}>
             <input value={vocabSearch} onChange={e => setVocabSearch(e.target.value)} placeholder="Rechercher..." style={{ flex: 1, minWidth: 140, padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }} />
+            <select value={vocabFilterUsage} onChange={e => setVocabFilterUsage(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
+              <option value="">Tous usages</option>
+              {allUsages.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
             <select value={vocabFilterTopik} onChange={e => setVocabFilterTopik(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
               <option value="">Tous niveaux</option>
               {[1, 2, 3, 4, 5, 6, 7].map(n => <option key={n} value={n}>TOPIK {n}</option>)}
