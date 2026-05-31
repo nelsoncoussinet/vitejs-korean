@@ -148,30 +148,30 @@ export default function App() {
     } catch (e) { showMsg("Erreur chargement grammaire: " + e.message, "error"); }
   };
 
-const handlePhotoUpload = async (e) => {
-  const file = e.target.files[0]; if (!file) return;
-  setPhoto(URL.createObjectURL(file));
-  
-  const b64 = await new Promise((res, rej) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const maxSize = 1024;
-      let w = img.width, h = img.height;
-      if (w > maxSize || h > maxSize) {
-        if (w > h) { h = h * maxSize / w; w = maxSize; }
-        else { w = w * maxSize / h; h = maxSize; }
-      }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      res(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
-    };
-    img.onerror = rej;
-    img.src = URL.createObjectURL(file);
-  });
-  
-  setPhotoB64(b64); setChatHistory([]); setPendingData(null);
-};
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    setPhoto(URL.createObjectURL(file));
+
+    const b64 = await new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 1024;
+        let w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = h * maxSize / w; w = maxSize; }
+          else { w = w * maxSize / h; h = maxSize; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        res(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+      };
+      img.onerror = rej;
+      img.src = URL.createObjectURL(file);
+    });
+
+    setPhotoB64(b64); setChatHistory([]); setPendingData(null);
+  };
   const getLastVocabId = () => {
     if (!vocabData.length) return "V0000";
     return vocabData[vocabData.length - 1].id;
@@ -182,7 +182,7 @@ const handlePhotoUpload = async (e) => {
     return gramData[gramData.length - 1].id;
   };
 
-const sendMessage = async (overrideText) => {
+  const sendMessage = async (overrideText) => {
     const text = overrideText || userInput.trim();
     if (!text && !photoB64) return;
 
@@ -193,14 +193,14 @@ const sendMessage = async (overrideText) => {
     setAnalyzing(true);
 
     try {
-      const lastVocabId = vocabData.length ? vocabData[vocabData.length-1].id : "V0000";
-      const lastGramId  = gramData.length  ? gramData[gramData.length-1].id   : "G0000";
+      const lastVocabId = vocabData.length ? vocabData[vocabData.length - 1].id : "V0000";
+      const lastGramId = gramData.length ? gramData[gramData.length - 1].id : "G0000";
 
       const parts = [];
-      if (photoB64) parts.push({ inlineData: { mimeType: "image/jpeg", data: photoB64 }});
-      parts.push({ text: `${text}\n\nDernier ID vocab en DB: ${lastVocabId}\nDernier ID gram en DB: ${lastGramId}\nVocab existant: ${vocabData.map(v=>v.mot).join(", ")||"aucun"}\nGram existante: ${gramData.map(g=>g.id+":"+g.grammaire).join(", ")||"aucune"}` });
+      if (photoB64) parts.push({ inlineData: { mimeType: "image/jpeg", data: photoB64 } });
+      parts.push({ text: `${text}\n\nDernier ID vocab en DB: ${lastVocabId}\nDernier ID gram en DB: ${lastGramId}\nVocab existant: ${vocabData.map(v => v.mot).join(", ") || "aucun"}\nGram existante: ${gramData.map(g => g.id + ":" + g.grammaire).join(", ") || "aucune"}` });
 
-      const history = updatedHistory.slice(0,-1).map(m => ({
+      const history = updatedHistory.slice(0, -1).map(m => ({
         role: m.role === "user" ? "user" : "model",
         parts: [{ text: m.content }]
       }));
@@ -217,11 +217,11 @@ const sendMessage = async (overrideText) => {
       const data = await res.json();
       const full = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur : pas de réponse";
       const jsonMatch = full.match(/```json\n([\s\S]*?)```/);
-      if (jsonMatch) { try { setPendingData(JSON.parse(jsonMatch[1])); } catch(_){} }
-      const displayText = full.replace(/```json[\s\S]*?```/g,"").trim();
+      if (jsonMatch) { try { setPendingData(JSON.parse(jsonMatch[1])); } catch (_) { } }
+      const displayText = full.replace(/```json[\s\S]*?```/g, "").trim();
       setChatHistory([...updatedHistory, { role: "assistant", content: displayText }]);
       setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    } catch(e) {
+    } catch (e) {
       showMsg("Erreur API: " + e.message, "error");
     } finally {
       setAnalyzing(false);
@@ -459,7 +459,7 @@ const sendMessage = async (overrideText) => {
             <input value={vocabSearch} onChange={e => setVocabSearch(e.target.value)} placeholder="Rechercher..." style={{ flex: 1, minWidth: 140, padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }} />
             <select value={vocabFilterTopik} onChange={e => setVocabFilterTopik(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
               <option value="">Tous niveaux</option>
-              {[1,2,3,4,5,6,7].map(n => <option key={n} value={n}>TOPIK {n}</option>)}
+              {[1, 2, 3, 4, 5, 6, 7].map(n => <option key={n} value={n}>TOPIK {n}</option>)}
             </select>
             <select value={vocabFilterStatut} onChange={e => setVocabFilterStatut(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
               <option value="">Tous statuts</option>
@@ -477,28 +477,35 @@ const sendMessage = async (overrideText) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredVocab.length === 0 ? (
-                  <tr><td colSpan={11} style={{ textAlign: "center", padding: "2rem", color: "#aaa" }}>Aucun résultat</td></tr>
-                ) : filteredVocab.map(r => (
-                  <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: "#aaa" }}>{r.id}</td>
-                    <td style={{ padding: "10px 12px", fontWeight: 500 }}>{r.mot}</td>
-                    <td style={{ padding: "10px 12px" }}><Badge value={r.type} /></td>
-                    <td style={{ padding: "10px 12px" }}>{r.fr || "—"}</td>
-                    <td style={{ padding: "10px 12px", color: "#888" }}>{r.en || "—"}</td>
-                    <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} /></td>
-                    <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} /></td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.usage} /></td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.theme} /></td>
-                    <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} /></td>
-                    <td style={{ padding: "10px 12px" }}>
-                      <div style={{ display: "flex", gap: 4 }}>
-                        <button style={{ ...btnStyle(), padding: "4px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)} title="Changer statut">↻</button>
-                        <button style={{ ...btnStyle("danger"), padding: "4px 8px", fontSize: 11 }} onClick={() => deleteEntry("vocabulaire", r.id)}>🗑</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {!fv.length ? <tr><td colSpan={9} style={{ textAlign: "center", padding: "2rem", color: "#bbb" }}>Aucun résultat</td></tr>
+                  : fv.map(r => {
+                    const statutColors = {
+                      inconnu: "rgba(200,200,200,0.3)",
+                      "à apprendre": "rgba(255,165,0,0.2)",
+                      reconnu: "rgba(100,149,237,0.2)",
+                      utilisable: "rgba(147,112,219,0.2)",
+                      maîtrisé: "rgba(60,179,113,0.2)"
+                    };
+                    const rowBg = statutColors[r.statut] || "transparent";
+                    return (
+                      <tr key={r.id} style={{ background: rowBg }}>
+                        <td style={{ ...td, whiteSpace: "nowrap" }}>{r.mot}</td>
+                        <td style={td}><Badge value={r.type} /></td>
+                        <td style={td}>{r.fr || "—"}</td>
+                        <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
+                        <td style={td}><Badge value={r.niveau_reel} /></td>
+                        <td style={td}><MultiTag val={r.usage} /></td>
+                        <td style={td}><MultiTag val={r.theme} /></td>
+                        <td style={{ ...td, maxWidth: 200 }}>{r.exemple || "—"}</td>
+                        <td style={td}>
+                          <div style={{ display: "flex", gap: 4 }}>
+                            <button style={{ ...B(), padding: "3px 8px", fontSize: 11 }} onClick={() => cycleStatut("vocabulaire", r.id, r.statut)} title="Changer le statut">↻</button>
+                            <button style={{ ...B("danger"), padding: "3px 8px", fontSize: 13 }} onClick={() => del("vocabulaire", r.id)} title="Supprimer ce mot">🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -525,7 +532,7 @@ const sendMessage = async (overrideText) => {
             <input value={gramSearch} onChange={e => setGramSearch(e.target.value)} placeholder="Rechercher..." style={{ flex: 1, minWidth: 140, padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }} />
             <select value={gramFilterCat} onChange={e => setGramFilterCat(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
               <option value="">Toutes catégories</option>
-              {["connecteur","terminaison","nominalisant","aspectuel","modal","conditionnel","temporel","causal","concessif","honorifique","expressif","formatif"].map(c => <option key={c} value={c}>{c}</option>)}
+              {["connecteur", "terminaison", "nominalisant", "aspectuel", "modal", "conditionnel", "temporel", "causal", "concessif", "honorifique", "expressif", "formatif"].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <select value={gramFilterStatut} onChange={e => setGramFilterStatut(e.target.value)} style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13 }}>
               <option value="">Tous statuts</option>
@@ -571,8 +578,8 @@ const sendMessage = async (overrideText) => {
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
-      <div style={{textAlign:"center",fontSize:11,color:"#bbb",marginTop:"2rem"}}>
-        V{__APP_VERSION__}
+      <div style={{ textAlign: "center", fontSize: 11, color: "#bbb", marginTop: "2rem" }}>
+        {import.meta.env.VITE_APP_VERSION || "dev"}
       </div>
     </div>
   );
