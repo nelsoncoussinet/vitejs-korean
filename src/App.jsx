@@ -477,8 +477,8 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {!fv.length ? <tr><td colSpan={9} style={{ textAlign: "center", padding: "2rem", color: "#bbb" }}>Aucun résultat</td></tr>
-                  : fv.map(r => {
+                {!filteredVocab.length ? <tr><td colSpan={9} style={{ textAlign: "center", padding: "2rem", color: "#bbb" }}>Aucun résultat</td></tr>
+                  : filteredVocab.map(r => {
                     const statutColors = {
                       inconnu: "rgba(200,200,200,0.3)",
                       "à apprendre": "rgba(255,165,0,0.2)",
@@ -499,8 +499,8 @@ export default function App() {
                         <td style={{ ...td, maxWidth: 200 }}>{r.exemple || "—"}</td>
                         <td style={td}>
                           <div style={{ display: "flex", gap: 4 }}>
-                            <button style={{ ...B(), padding: "3px 8px", fontSize: 11 }} onClick={() => cycleStatut("vocabulaire", r.id, r.statut)} title="Changer le statut">↻</button>
-                            <button style={{ ...B("danger"), padding: "3px 8px", fontSize: 13 }} onClick={() => del("vocabulaire", r.id)} title="Supprimer ce mot">🗑️</button>
+                            <button style={{ ...btnStyle(), padding: "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)} title="Changer le statut">↻</button>
+                            <button style={{ ...btnStyle("danger"), padding: "3px 8px", fontSize: 13 }} onClick={() => deleteEntry("vocabulaire", r.id)} title="Supprimer ce mot">🗑️</button>
                           </div>
                         </td>
                       </tr>
