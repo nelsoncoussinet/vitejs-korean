@@ -33,7 +33,8 @@ TYPE vocabulaire seul : cherche si un texte a été fourni dans la conversation 
 
 TYPE grammaire : pour chaque grammaire :
 - Si elle existe déjà en DB : présente les 2 versions et demande validation
-- Si définition absente sur photo : préviens l'utilisateur
+- Si définition absente sur photo : demande OBLIGATOIREMENT à l'utilisateur de la fournir avant de continuer. Ne génère JAMAIS de vocabulaire associé à une grammaire.
+- Ne propose JAMAIS de mots de vocabulaire dans une analyse de type grammaire.
 - Format fiche :
   ### [GRAMMAIRE] — ID: Gxxxx
   Catégorie | Sous-catégorie | Oral/Écrit | Niveau réel | TOPIK objectif | Usage
@@ -570,6 +571,9 @@ const sendMessage = async (overrideText) => {
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
+      <div style={{textAlign:"center",fontSize:11,color:"#bbb",marginTop:"2rem"}}>
+        v{import.meta.env.VITE_GIT_COMMIT_SHA || "dev"}
+      </div>
     </div>
   );
 }
