@@ -323,7 +323,7 @@ export default function App() {
   const td = { padding: "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
 
   return (
-    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", maxWidth: 1100, margin: "0 auto", padding: "1rem" }}>
+    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", maxWidth: 1100, margin: "0 auto", padding: "1rem", overflowX: "hidden", maxWidth: "100vw" }}>
       <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
       {/* Header */}
