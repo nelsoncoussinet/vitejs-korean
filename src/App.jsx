@@ -588,7 +588,7 @@ export default function App() {
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
       <div style={{ textAlign: "center", fontSize: 11, color: "#bbb", marginTop: "2rem" }}>
-        {import.meta.env.VITE_APP_VERSION || "dev"}
+        {__APP_VERSION__  || "dev"}
       </div>
     </div>
   );
