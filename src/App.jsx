@@ -23,8 +23,7 @@ TYPE texte/texte+vocabulaire :
 1. Réécriture coréenne propre
 2. Traduction anglaise complète
 3. Traduction française complète
-4. Si vocabulaire présent : tableau avec colonnes id|mot|type|definition_kr|fr|en|niveau_reel|topik_objectif|usage|theme|chapitre|exemple|statut
-   - ID format V0001+ (incrémenter depuis dernier ID fourni)
+4. Si vocabulaire présent : tableau avec colonnes mot|type|definition_kr|fr|en|niveau_reel|topik_objectif|usage|theme|chapitre|exemple|statut
    - topik_objectif: ≤4→4, >4→5ou6, quotidien→7
    - usage: quotidien|travail|topik (séparateur |)
    - theme: mots-clés séparés par |
@@ -37,11 +36,11 @@ TYPE grammaire : pour chaque grammaire :
 - Si définition absente sur photo : demande OBLIGATOIREMENT à l'utilisateur de la fournir avant de continuer. Ne génère JAMAIS de vocabulaire associé à une grammaire.
 - Ne propose JAMAIS de mots de vocabulaire dans une analyse de type grammaire.
 - Format fiche :
-  ### [GRAMMAIRE] — ID: Gxxxx
+  ### [GRAMMAIRE]
   Catégorie | Sous-catégorie | Oral/Écrit | Niveau réel | TOPIK objectif | Usage
   Définition KR / Définition FR (1-2 phrases)
   Points importants (liste)
-  Grammaires similaires (ID si en DB, sinon nom coréen)
+  Grammaires similaires (nom coréen)
   Exemples (2 max, format: coréen → français)
 
 TYPE expressions (쓰기/읽기) : détaille chaque expression, traduction FR+EN, nuance, exemple, registre (oral/écrit/formel/informel).
@@ -57,8 +56,8 @@ TYPE expressions (쓰기/읽기) : détaille chaque expression, traduction FR+EN
   "expressions": [...]
 }
 \`\`\`
-Chaque entrée vocabulaire : {id,mot,type,definition_kr,fr,en,niveau_reel,topik_objectif,usage,theme,chapitre,exemple,statut}
-Chaque entrée grammaire : {id,grammaire,categorie,sous_categorie,definition_kr,definition_fr,oral_ecrit,niveau_reel,topik_objectif,usage,grammaires_similaires,points_importants,exemples,chapitre,statut}`;
+Chaque entrée vocabulaire : {mot,type,definition_kr,fr,en,niveau_reel,topik_objectif,usage,theme,chapitre,exemple,statut}
+Chaque entrée grammaire : {grammaire,categorie,sous_categorie,definition_kr,definition_fr,oral_ecrit,niveau_reel,topik_objectif,usage,grammaires_similaires,points_importants,exemples,chapitre,statut}`;
 
 async function supabase(path, method = "GET", body = null) {
   const opts = { method, headers: SUPA_HEADERS };
@@ -191,15 +190,6 @@ export default function App() {
 
     setPhotoB64(b64); setChatHistory([]); setPendingData(null);
   };
-  const getLastVocabId = () => {
-    if (!vocabData.length) return "V0000";
-    return vocabData[vocabData.length - 1].id;
-  };
-
-  const getLastGramId = () => {
-    if (!gramData.length) return "G0000";
-    return gramData[gramData.length - 1].id;
-  };
 
   const sendMessage = async (overrideText) => {
     const text = overrideText || userInput.trim();
@@ -212,12 +202,9 @@ export default function App() {
     setAnalyzing(true);
 
     try {
-      const lastVocabId = vocabData.length ? vocabData[vocabData.length - 1].id : "V0000";
-      const lastGramId = gramData.length ? gramData[gramData.length - 1].id : "G0000";
-
       const parts = [];
       if (photoB64) parts.push({ inlineData: { mimeType: "image/jpeg", data: photoB64 } });
-      parts.push({ text: `${text}\n\nDernier ID vocab en DB: ${lastVocabId}\nDernier ID gram en DB: ${lastGramId}\nVocab existant: ${vocabData.map(v => v.mot).join(", ") || "aucun"}\nGram existante: ${gramData.map(g => g.id + ":" + g.grammaire).join(", ") || "aucune"}` });
+      parts.push({ text: `${text}\n\nVocab existant: ${vocabData.map(v => v.mot).join(", ") || "aucun"}\nGram existante: ${gramData.map(g => g.grammaire).join(", ") || "aucune"}` });
 
       const history = updatedHistory.slice(0, -1).map(m => ({
         role: m.role === "user" ? "user" : "model",
@@ -251,9 +238,8 @@ export default function App() {
       // Vocabulaire
       if (pendingData.vocabulaire?.length) {
         const existingMots = new Set(vocabData.map(v => v.mot));
-        const existingIds = new Set(vocabData.map(v => v.id));
         const toInsert = pendingData.vocabulaire
-          .filter(v => !existingMots.has(v.mot) && !existingIds.has(v.id))
+          .filter(v => !existingMots.has(v.mot))
           .map(v => ({ ...v, topik_objectif: v.topik_objectif ? parseInt(v.topik_objectif) : null }));
         skipped += pendingData.vocabulaire.length - toInsert.length;
         if (toInsert.length) {
@@ -265,8 +251,7 @@ export default function App() {
       // Grammaire
       if (pendingData.grammaire?.length) {
         const existingG = new Set(gramData.map(g => g.grammaire));
-        const existingIds = new Set(gramData.map(g => g.id));
-        const toInsert = pendingData.grammaire.filter(g => !existingG.has(g.grammaire) && !existingIds.has(g.id));
+        const toInsert = pendingData.grammaire.filter(g => !existingG.has(g.grammaire));
         skipped += pendingData.grammaire.length - toInsert.length;
         if (toInsert.length) {
           await supabase("/grammaire", "POST", toInsert);
@@ -568,7 +553,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#fafafa" }}>
-                  {["ID", "Grammaire", "Catégorie", "Sous-cat.", "Définition FR", "Oral/Écrit", "Niveau", "TOPIK", "Statut", ""].map(h => (
+                  {["Grammaire", "Catégorie", "Sous-cat.", "Définition FR", "Oral/Écrit", "Niveau", "TOPIK", "Statut", ""].map(h => (
                     <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 500, fontSize: 12, color: "#888", borderBottom: "1px solid #e0e0e0", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -578,7 +563,6 @@ export default function App() {
                   <tr><td colSpan={10} style={{ textAlign: "center", padding: "2rem", color: "#aaa" }}>Aucun résultat</td></tr>
                 ) : filteredGram.map(r => (
                   <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: "#aaa" }}>{r.id}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: 15 }}>{r.grammaire}</td>
                     <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} small={isMobile} /></td>
                     <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} small={isMobile} /></td>
