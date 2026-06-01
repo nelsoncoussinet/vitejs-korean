@@ -24,6 +24,8 @@ TYPE texte/texte+vocabulaire :
 2. Traduction anglaise complète
 3. Traduction française complète
 4. Si vocabulaire présent : tableau avec colonnes mot|type|definition_kr|fr|en|niveau_reel|topik_objectif|usage|theme|chapitre|exemple|statut
+   - utilise OBLIGATOIREMENT le texte comme contexte pour enrichir les traductions et définitions des mots de vocabulaire
+   - fr et en : si plusieurs définitions, format (1) déf1 (2) déf2 (3) déf3
    - topik_objectif: ≤4→4, >4→5ou6, quotidien→7
    - usage: quotidien|travail|topik (séparateur |)
    - theme: mots-clés séparés par |
