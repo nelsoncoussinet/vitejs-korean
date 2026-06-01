@@ -93,18 +93,34 @@ function Badge({ value, color = "gray", small = false }) {
 
 function MultiTag({ val }) {
   if (!val) return <span style={{ color: "#999" }}>—</span>;
-  return <>{val.split("|").map((v, i) => <Badge key={i} value={v.trim()} small={isMobile}/>)}</>;
+  return <>{val.split("|").map((v, i) => <Badge key={i} value={v.trim()} small={isMobile} />)}</>;
 }
 
 function TopikBadge({ v }) {
   if (!v) return null;
   const color = v <= 2 ? "green" : v <= 4 ? "blue" : v <= 6 ? "amber" : "purple";
-  return <Badge value={`T${v}`} color={color} small={isMobile}/>;
+  return <Badge value={`T${v}`} color={color} small={isMobile} />;
 }
 
 function StatutBadge({ s }) {
   const colors = { inconnu: "gray", "à apprendre": "amber", reconnu: "blue", utilisable: "purple", maîtrisé: "green" };
-  return <Badge value={s || "—"} color={colors[s] || "gray"} small={isMobile}/>;
+  return <Badge value={s || "—"} color={colors[s] || "gray"} small={isMobile} />;
+}
+
+async function callGemini(payload, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return res.json();
+    if (res.status === 503 && i < retries - 1) {
+      await new Promise(r => setTimeout(r, 1000 * (i + 1))); // 1s, 2s, 3s
+      continue;
+    }
+    throw new Error(`Erreur ${res.status}`);
+  }
 }
 
 const STATUTS = ["inconnu", "à apprendre", "reconnu", "utilisable", "maîtrisé"];
@@ -208,16 +224,11 @@ export default function App() {
         parts: [{ text: m.content }]
       }));
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SKILL_PROMPT }] },
-          contents: [...history, { role: "user", parts }]
-        })
+      const data = await callGemini({
+        system_instruction: { parts: [{ text: SKILL_PROMPT }] },
+        contents: [...history, { role: "user", parts }]
       });
 
-      const data = await res.json();
       const full = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur : pas de réponse";
       const jsonMatch = full.match(/```json\n([\s\S]*?)```/);
       if (jsonMatch) { try { setPendingData(JSON.parse(jsonMatch[1])); } catch (_) { } }
@@ -241,7 +252,9 @@ export default function App() {
       if (pendingData.vocabulaire?.length) {
         const existingMots = new Set(vocabData.map(v => v.mot));
         const existingIds = new Set(vocabData.map(v => v.id));
-        const toInsert = pendingData.vocabulaire.filter(v => !existingMots.has(v.mot) && !existingIds.has(v.id));
+        const toInsert = pendingData.vocabulaire
+          .filter(v => !existingMots.has(v.mot) && !existingIds.has(v.id))
+          .map(v => ({ ...v, topik_objectif: v.topik_objectif ? parseInt(v.topik_objectif) : null }));
         skipped += pendingData.vocabulaire.length - toInsert.length;
         if (toInsert.length) {
           await supabase("/vocabulaire", "POST", toInsert);
@@ -502,12 +515,12 @@ export default function App() {
                     return (
                       <tr key={r.id} style={{ background: rowBg }}>
                         <td style={{ ...td, fontWeight: 600, fontSize: 15, whiteSpace: "nowrap" }}>{r.mot}</td>
-                        {!isMobile && <td style={td}><Badge value={r.type} small={isMobile}/></td>}
+                        {!isMobile && <td style={td}><Badge value={r.type} small={isMobile} /></td>}
                         <td style={td}>{r.fr || "—"}</td>
                         <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
-                        {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} small={isMobile}/></td>}
-                        {!isMobile && <td style={td}><MultiTag val={r.usage} small={isMobile}/></td>}
-                        {!isMobile && <td style={td}><MultiTag val={r.theme} small={isMobile}/></td>}
+                        {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>}
+                        {!isMobile && <td style={td}><MultiTag val={r.usage} small={isMobile} /></td>}
+                        {!isMobile && <td style={td}><MultiTag val={r.theme} small={isMobile} /></td>}
                         <td style={td}>
                           <div style={{ display: "flex", gap: 4 }}>
                             <button style={{ ...btnStyle(), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)}>↻</button>
@@ -567,13 +580,13 @@ export default function App() {
                   <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                     <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: "#aaa" }}>{r.id}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: 15 }}>{r.grammaire}</td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} small={isMobile}/></td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} small={isMobile}/></td>
+                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} small={isMobile} /></td>
+                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} small={isMobile} /></td>
                     <td style={{ padding: "10px 12px", maxWidth: 200, fontSize: 12, color: "#555" }}>{r.definition_fr || "—"}</td>
-                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} small={isMobile}/></td>
-                    <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} small={isMobile}/></td>
-                    <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} small={isMobile}/></td>
-                    <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} small={isMobile}/></td>
+                    <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} small={isMobile} /></td>
+                    <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} small={isMobile} /></td>
+                    <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>
+                    <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} small={isMobile} /></td>
                     <td style={{ padding: "10px 12px" }}>
                       <div style={{ display: "flex", gap: 4 }}>
                         <button style={{ ...btnStyle(), padding: "4px 8px", fontSize: 11 }} onClick={() => changeStatut("grammaire", r.id, r.statut)} title="Changer statut">↻</button>
