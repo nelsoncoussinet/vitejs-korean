@@ -146,6 +146,11 @@ export default function App() {
   const [gramSearch, setGramSearch] = useState("");
   const [gramFilterCat, setGramFilterCat] = useState("");
   const [gramFilterStatut, setGramFilterStatut] = useState("");
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [editingField, setEditingField] = useState(null); // { id, field }
+  const [editValue, setEditValue] = useState("");
+  const [saving, setSaving] = useState(false);
+  const pointerDownY = useRef(0);
   const fileRef = useRef();
   const chatEndRef = useRef();
 
@@ -287,6 +292,22 @@ export default function App() {
       showMsg(`${id} supprimé`);
       table === "vocabulaire" ? await loadVocab() : await loadGram();
     } catch (e) { showMsg("Erreur: " + e.message, "error"); }
+  };
+  
+  const parseDefinitions = (str) => {
+    if (!str) return [];
+    const parts = str.split(/\(\d+\)/).map(s => s.trim()).filter(Boolean);
+    return parts.length > 1 ? parts : [str];
+  };
+
+  const saveField = async (id, field, value) => {
+    setSaving(true);
+    try {
+      await supabase(`/vocabulaire?id=eq.${id}`, "PATCH", { [field]: value, updated_at: new Date().toISOString() });
+      setVocabData(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+      setEditingField(null);
+    } catch (e) { showMsg("Erreur: " + e.message, "error"); }
+    finally { setSaving(false); }
   };
 
   const allUsages = [...new Set(vocabData.flatMap(r => r.usage ? r.usage.split("|").map(t => t.trim()) : []))].sort();
@@ -498,23 +519,95 @@ export default function App() {
                       utilisable: "rgba(147,112,219,0.2)",
                       maîtrisé: "rgba(60,179,113,0.2)"
                     };
-                    const rowBg = statutColors[r.statut] || "transparent";
+                    const isExpanded = expandedRow === r.id;
+                    const colSpan = isMobile ? 4 : 8;
                     return (
-                      <tr key={r.id} style={{ background: rowBg }}>
-                        <td style={{ ...td, fontWeight: 600, fontSize: 15, whiteSpace: "nowrap" }}>{r.mot}</td>
-                        {!isMobile && <td style={td}><Badge value={r.type} small={isMobile} /></td>}
-                        <td style={td}>{r.fr || "—"}</td>
-                        <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
-                        {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>}
-                        {!isMobile && <td style={td}><MultiTag val={r.usage} small={isMobile} /></td>}
-                        {!isMobile && <td style={td}><MultiTag val={r.theme} small={isMobile} /></td>}
-                        <td style={td}>
-                          <div style={{ display: "flex", gap: 4 }}>
-                            <button style={{ ...btnStyle(), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 11 }} onClick={() => changeStatut("vocabulaire", r.id, r.statut)}>↻</button>
-                            <button style={{ ...btnStyle("danger"), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 13 }} onClick={() => deleteEntry("vocabulaire", r.id)}>🗑️</button>
-                          </div>
-                        </td>
-                      </tr>
+                      <>
+                        <tr
+                          key={r.id}
+                          style={{ background: statutColors[r.statut] || "transparent", cursor: "pointer" }}
+                          onPointerDown={e => { pointerDownY.current = e.clientY; }}
+                          onPointerUp={e => {
+                            if (Math.abs(e.clientY - pointerDownY.current) < 5)
+                              setExpandedRow(isExpanded ? null : r.id);
+                          }}
+                        >
+                          <td style={{ ...td, fontWeight: 600, fontSize: 15, whiteSpace: "nowrap" }}>{r.mot}</td>
+                          {!isMobile && <td style={td}><Badge value={r.type} small={isMobile} /></td>}
+                          <td style={td}>{r.fr || "—"}</td>
+                          <td style={{ ...td, color: "#999" }}>{r.en || "—"}</td>
+                          {!isMobile && <td style={td}><TopikBadge v={r.topik_objectif} /></td>}
+                          {!isMobile && <td style={td}><MultiTag val={r.usage} /></td>}
+                          {!isMobile && <td style={td}><MultiTag val={r.theme} /></td>}
+                          <td style={td}>
+                            <div style={{ display: "flex", gap: 4 }}>
+                              <button style={{ ...btnStyle(), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 11 }}
+                                onPointerDown={e => e.stopPropagation()}
+                                onClick={e => { e.stopPropagation(); changeStatut("vocabulaire", r.id, r.statut); }}>↻</button>
+                              <button style={{ ...btnStyle("danger"), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 13 }}
+                                onPointerDown={e => e.stopPropagation()}
+                                onClick={e => { e.stopPropagation(); deleteEntry("vocabulaire", r.id); }}>🗑️</button>
+                            </div>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr key={`${r.id}-panel`} style={{ background: "#fafafa" }}>
+                            <td colSpan={colSpan} style={{ padding: "12px 16px", borderBottom: "1px solid #e0e0e0" }}>
+                              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, fontSize: 13 }}>
+                                {/* FR éditable */}
+                                <div>
+                                  <div style={{ fontSize: 11, color: "#888", marginBottom: 4 }}>Traduction FR</div>
+                                  {editingField?.id === r.id && editingField?.field === "fr" ? (
+                                    <div style={{ display: "flex", gap: 6 }}>
+                                      <textarea value={editValue} onChange={e => setEditValue(e.target.value)}
+                                        rows={3} style={{ flex: 1, padding: "6px 8px", borderRadius: 6, border: "1px solid #ccc", fontSize: 13, resize: "vertical" }} />
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                        <button style={btnStyle("primary")} disabled={saving}
+                                          onClick={() => saveField(r.id, "fr", editValue)}>✓</button>
+                                        <button style={btnStyle()} onClick={() => setEditingField(null)}>✕</button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div onClick={() => { setEditingField({ id: r.id, field: "fr" }); setEditValue(r.fr || ""); }}
+                                      style={{ cursor: "text", padding: "6px 8px", borderRadius: 6, border: "1px dashed #ddd", minHeight: 40, background: "#fff" }}>
+                                      {parseDefinitions(r.fr).length > 1
+                                        ? parseDefinitions(r.fr).map((d, i) => <div key={i}><span style={{ color: "#aaa", marginRight: 4 }}>({i+1})</span>{d}</div>)
+                                        : <span>{r.fr || <span style={{ color: "#bbb" }}>—</span>}</span>}
+                                    </div>
+                                  )}
+                                </div>
+                                {/* EN éditable */}
+                                <div>
+                                  <div style={{ fontSize: 11, color: "#888", marginBottom: 4 }}>Traduction EN</div>
+                                  {editingField?.id === r.id && editingField?.field === "en" ? (
+                                    <div style={{ display: "flex", gap: 6 }}>
+                                      <textarea value={editValue} onChange={e => setEditValue(e.target.value)}
+                                        rows={3} style={{ flex: 1, padding: "6px 8px", borderRadius: 6, border: "1px solid #ccc", fontSize: 13, resize: "vertical" }} />
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                        <button style={btnStyle("primary")} disabled={saving}
+                                          onClick={() => saveField(r.id, "en", editValue)}>✓</button>
+                                        <button style={btnStyle()} onClick={() => setEditingField(null)}>✕</button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div onClick={() => { setEditingField({ id: r.id, field: "en" }); setEditValue(r.en || ""); }}
+                                      style={{ cursor: "text", padding: "6px 8px", borderRadius: 6, border: "1px dashed #ddd", minHeight: 40, background: "#fff" }}>
+                                      {parseDefinitions(r.en).length > 1
+                                        ? parseDefinitions(r.en).map((d, i) => <div key={i}><span style={{ color: "#aaa", marginRight: 4 }}>({i+1})</span>{d}</div>)
+                                        : <span>{r.en || <span style={{ color: "#bbb" }}>—</span>}</span>}
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Infos lecture seule */}
+                                {r.definition_kr && <div><span style={{ fontSize: 11, color: "#888" }}>Déf. KR : </span>{r.definition_kr}</div>}
+                                {r.exemple && <div><span style={{ fontSize: 11, color: "#888" }}>Exemple : </span>{r.exemple}</div>}
+                                {r.theme && <div><span style={{ fontSize: 11, color: "#888" }}>Thème : </span><MultiTag val={r.theme} /></div>}
+                                {r.usage && <div><span style={{ fontSize: 11, color: "#888" }}>Usage : </span><MultiTag val={r.usage} /></div>}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     );
                   })}
               </tbody>
@@ -552,7 +645,7 @@ export default function App() {
             <button style={btnStyle()} onClick={loadGram}>↺ Actualiser</button>
           </div>
           <div style={{ overflowX: "auto", border: "1px solid #e0e0e0", borderRadius: 10 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, tableLayout: "fixed" }}>
               <thead>
                 <tr style={{ background: "#fafafa" }}>
                   {["Grammaire", "Catégorie", "Sous-cat.", "Définition FR", "Oral/Écrit", "Niveau", "TOPIK", "Statut", ""].map(h => (
@@ -568,7 +661,7 @@ export default function App() {
                     <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: 15 }}>{r.grammaire}</td>
                     <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} small={isMobile} /></td>
                     <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} small={isMobile} /></td>
-                    <td style={{ padding: "10px 12px", maxWidth: 200, fontSize: 12, color: "#555" }}>{r.definition_fr || "—"}</td>
+                    <td style={{ padding: "10px 12px", width: isMobile ? "45%" : "35%", fontSize: 12, color: "#555", wordBreak: "break-word" }}>{r.definition_fr || "—"}</td>
                     <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} small={isMobile} /></td>
                     <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} small={isMobile} /></td>
                     <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>
