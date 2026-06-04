@@ -45,7 +45,7 @@ export default function App() {
 
   const loadVocab = async () => {
     try {
-      const data = await supabase("/vocabulaire?order=id.asc&limit=1000");
+      const data = await loadVocabularyFromDb();
       setVocabData(data);
     } catch (e) {
       showMsg("Erreur chargement vocabulaire: " + e.message, "error");
@@ -54,7 +54,7 @@ export default function App() {
 
   const loadGram = async () => {
     try {
-      const data = await supabase("/grammaire?order=id.asc&limit=1000");
+      const data = await loadGrammarFromDb();
       setGramData(data);
     } catch (e) {
       showMsg("Erreur chargement grammaire: " + e.message, "error");
@@ -184,7 +184,7 @@ export default function App() {
   const changeStatut = async (table, id, current) => {
     const next = STATUTS[(STATUTS.indexOf(current) + 1) % STATUTS.length];
     try {
-      await supabase(`/${table}?id=eq.${id}`, "PATCH", { statut: next, updated_at: new Date().toISOString() });
+      await updateStatutToDb(table, id, next);
       table === "vocabulaire" ? await loadVocab() : await loadGram();
     } catch (e) {
       showMsg("Erreur: " + e.message, "error");
@@ -194,7 +194,7 @@ export default function App() {
   const deleteEntry = async (table, id) => {
     if (!confirm(`Supprimer ${id} ?`)) return;
     try {
-      await supabase(`/${table}?id=eq.${id}`, "DELETE");
+      await deleteEntryToDb(table, id);
       showMsg(`${id} supprimé`);
       table === "vocabulaire" ? await loadVocab() : await loadGram();
     } catch (e) {
@@ -205,7 +205,7 @@ export default function App() {
   const saveField = async (id, field, value, dontClear = false) => {
     setSaving(true);
     try {
-      await supabase(`/vocabulaire?id=eq.${id}`, "PATCH", { [field]: value, updated_at: new Date().toISOString() });
+      await updateVocabularyFieldToDb(id, field, value);
       setVocabData((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
       if (!dontClear) setEditingField(null);
     } catch (e) {
@@ -343,7 +343,7 @@ export default function App() {
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
-      <div className="app-version">
+      <div style={{ textAlign: "center", fontSize: 11, color: "#bbb", marginTop: "2rem" }}>
         {__APP_VERSION__ || "dev"}
       </div>
     </div>
