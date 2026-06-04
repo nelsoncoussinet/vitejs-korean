@@ -95,13 +95,13 @@ export default function GramTab({
               filteredGram.map((r) => (
                 <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                   <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: 15 }}>{r.grammaire}</td>
-                  <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} /></td>
-                  <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} /></td>
+                  <td style={{ padding: "10px 12px" }}><MultiTag val={r.categorie} small={isMobile} /></td>
+                  <td style={{ padding: "10px 12px" }}><MultiTag val={r.sous_categorie} small={isMobile} /></td>
                   <td style={{ padding: "10px 12px", width: isMobile ? "45%" : "35%", fontSize: 12, color: "#555", wordBreak: "break-word" }}>{r.definition_fr || "—"}</td>
-                  <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} /></td>
+                  <td style={{ padding: "10px 12px" }}><MultiTag val={r.oral_ecrit} small={isMobile} /></td>
                   <td style={{ padding: "10px 12px" }}><Badge value={r.niveau_reel} small={isMobile} /></td>
-                  <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} /></td>
-                  <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} /></td>
+                  <td style={{ padding: "10px 12px" }}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>
+                  <td style={{ padding: "10px 12px" }}><StatutBadge s={r.statut} small={isMobile} /></td>
                   <td style={{ padding: "10px 12px" }}>
                     <div style={{ display: "flex", gap: 4 }}>
                       <button style={{ ...btnStyle(), padding: "4px 8px", fontSize: 11 }} onClick={() => changeStatut("grammaire", r.id, r.statut)} title="Changer statut">

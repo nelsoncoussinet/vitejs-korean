@@ -109,3 +109,296 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.app-shell {
+  font-family: 'IBM Plex Sans', sans-serif;
+  margin: 0 auto;
+  padding: 1rem;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.app-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.app-header p {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0 0;
+}
+
+.header-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.stats-pill {
+  font-size: 12px;
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 99px;
+  display: inline-block;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  font-weight: 400;
+  color: #888;
+  margin-bottom: -1px;
+}
+
+.tab-button.active {
+  border-bottom-color: #1a1a1a;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.status-msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 1rem;
+}
+
+.status-msg.error {
+  background: #fff5f5;
+  color: #c0392b;
+  border: 1px solid #fcc;
+}
+
+.status-msg.success {
+  background: #f0faf0;
+  color: #2d6a2d;
+  border: 1px solid #c0e0c0;
+}
+
+.app-version {
+  text-align: center;
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+
+.card-label {
+  font-size: 12px;
+  color: #888;
+}
+
+.card-value {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.control-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.control-input,
+.control-select,
+.control-textarea {
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  font-size: 13px;
+}
+
+.control-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.button {
+  padding: 7px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.button.primary {
+  border: none;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.button.danger {
+  background: #fff5f5;
+  color: #c0392b;
+}
+
+.button.small {
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.button.smaller {
+  padding: 2px 5px;
+  font-size: 11px;
+}
+
+.table-card {
+  font-size: 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table-head-row {
+  background: #fafafa;
+}
+
+.table-head-cell {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 12px;
+  color: #888;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.table-empty-cell {
+  text-align: center;
+  padding: 2rem;
+  color: #bbb;
+}
+
+.table-panel-row {
+  background: #fafafa;
+}
+
+.table-cell {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.table-cell-condensed {
+  padding: 6px 4px;
+}
+
+.panel-grid {
+  display: grid;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.panel-grid.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+.panel-grid.one-col {
+  grid-template-columns: 1fr;
+}
+
+.panel-header {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.panel-box {
+  cursor: text;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px dashed #ddd;
+  min-height: 40px;
+  background: #fff;
+}
+
+.textarea-sm {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.textarea-xs {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.badge-label {
+  font-size: 11px;
+  color: #888;
+}
+
+.info-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  font-size: 13px;
+}
+
+.info-note {
+  color: #666;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.panel-box-light {
+  background: #fff;
+}

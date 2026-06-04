@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import AnalyseTab from "./components/AnalyseTab";
 import VocabTab from "./components/VocabTab";
 import GramTab from "./components/GramTab";
-import { supabase, callGemini, SKILL_PROMPT, STATUTS, isMobile } from "./lib/api";
+import { supabase, callGemini, SKILL_PROMPT, STATUTS } from "./lib/api";
 
 export default function App() {
   const [tab, setTab] = useState("analyse");
@@ -27,7 +27,14 @@ export default function App() {
   const [editingField, setEditingField] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const pointerDownY = useRef(0);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const fileRef = useRef();
   const chatEndRef = useRef();
 
@@ -195,12 +202,12 @@ export default function App() {
     }
   };
 
-  const saveField = async (id, field, value) => {
+  const saveField = async (id, field, value, dontClear = false) => {
     setSaving(true);
     try {
       await supabase(`/vocabulaire?id=eq.${id}`, "PATCH", { [field]: value, updated_at: new Date().toISOString() });
       setVocabData((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
-      setEditingField(null);
+      if (!dontClear) setEditingField(null);
     } catch (e) {
       showMsg("Erreur: " + e.message, "error");
     } finally {
@@ -225,44 +232,32 @@ export default function App() {
     return true;
   });
 
-  const tabStyle = (t) => ({
-    padding: "8px 16px",
-    fontSize: 13,
-    cursor: "pointer",
-    border: "none",
-    background: "none",
-    borderBottom: tab === t ? "2px solid #1a1a1a" : "2px solid transparent",
-    fontWeight: tab === t ? 600 : 400,
-    color: tab === t ? "#1a1a1a" : "#888",
-    marginBottom: -1,
-  });
-
   return (
-    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", margin: "0 auto", padding: "1rem", overflowX: "hidden", maxWidth: "100vw" }}>
+    <div className="app-shell">
       <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+      <div className="app-header">
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>Korean Learning DB</h1>
-          <p style={{ fontSize: 12, color: "#888", margin: "2px 0 0" }}>살아있는 한국어 · Objectif TOPIK 4</p>
+          <h1>Korean Learning DB</h1>
+          <p>살아있는 한국어 · Objectif TOPIK 4</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <span style={{ fontSize: 12, background: "#f0f0f0", padding: "4px 10px", borderRadius: 99 }}>{vocabData.length} mots</span>
-          <span style={{ fontSize: 12, background: "#f0f0f0", padding: "4px 10px", borderRadius: 99 }}>{gramData.length} grammaires</span>
+        <div className="header-stats">
+          <span className="stats-pill">{vocabData.length} mots</span>
+          <span className="stats-pill">{gramData.length} grammaires</span>
         </div>
       </div>
 
       {msg && (
-        <div style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13, marginBottom: "1rem", background: msg.type === "error" ? "#fff5f5" : "#f0faf0", color: msg.type === "error" ? "#c0392b" : "#2d6a2d", border: `1px solid ${msg.type === "error" ? "#fcc" : "#c0e0c0"}` }}>
+        <div className={`status-msg ${msg.type === "error" ? "error" : "success"}`}>
           {msg.text}
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid #e0e0e0", marginBottom: "1.5rem" }}>
-        {[["analyse", "Analyser"], ["vocab", "Vocabulaire"], ["gram", "Grammaire"]].map(([key, label]) => (
+      <div className="tabs">
+        {[['analyse', 'Analyser'], ['vocab', 'Vocabulaire'], ['gram', 'Grammaire']].map(([key, label]) => (
           <button
             key={key}
-            style={tabStyle(key)}
+            className={`tab-button ${tab === key ? 'active' : ''}`}
             onClick={() => {
               setTab(key);
               if (key === "vocab") loadVocab();
@@ -348,7 +343,7 @@ export default function App() {
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
-      <div style={{ textAlign: "center", fontSize: 11, color: "#bbb", marginTop: "2rem" }}>
+      <div className="app-version">
         {__APP_VERSION__ || "dev"}
       </div>
     </div>

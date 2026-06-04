@@ -1,5 +1,3 @@
-import { isMobile } from "../lib/api";
-
 const colorStyles = {
   gray: { background: "#f1efe8", color: "#5f5e5a" },
   blue: { background: "#e6f1fb", color: "#0c447c" },
@@ -28,18 +26,18 @@ export function Badge({ value, color = "gray", small = false }) {
   );
 }
 
-export function MultiTag({ val }) {
+export function MultiTag({ val, small = false }) {
   if (!val) return <span style={{ color: "#999" }}>—</span>;
-  return <>{val.split("|").map((v, i) => <Badge key={i} value={v.trim()} small={isMobile} />)}</>;
+  return <>{val.split("|").map((v, i) => <Badge key={i} value={v.trim()} small={small} />)}</>;
 }
 
-export function TopikBadge({ v }) {
+export function TopikBadge({ v, small = false }) {
   if (!v) return null;
   const color = v <= 2 ? "green" : v <= 4 ? "blue" : v <= 6 ? "amber" : "purple";
-  return <Badge value={`T${v}`} color={color} small={isMobile} />;
+  return <Badge value={`T${v}`} color={color} small={small} />;
 }
 
-export function StatutBadge({ s }) {
+export function StatutBadge({ s, small = false }) {
   const colors = { inconnu: "gray", "à apprendre": "amber", reconnu: "blue", utilisable: "purple", maîtrisé: "green" };
-  return <Badge value={s || "—"} color={colors[s] || "gray"} small={isMobile} />;
+  return <Badge value={s || "—"} color={colors[s] || "gray"} small={small} />;
 }
