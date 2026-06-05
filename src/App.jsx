@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import AnalyseTab from "./components/AnalyseTab";
 import VocabTab from "./components/VocabTab";
 import GramTab from "./components/GramTab";
-import { supabase, callGemini, SKILL_PROMPT, STATUTS } from "./lib/api";
+import { STATUTS } from "./lib/api";
 import {
   loadVocabularyFromDb,
   loadGrammarFromDb,
@@ -16,13 +16,6 @@ export default function App() {
   const [vocabData, setVocabData] = useState([]);
   const [gramData, setGramData] = useState([]);
   const [msg, setMsg] = useState(null);
-  const [photo, setPhoto] = useState(null);
-  const [photoB64, setPhotoB64] = useState(null);
-  const [chatHistory, setChatHistory] = useState([]);
-  const [userInput, setUserInput] = useState("");
-  const [analyzing, setAnalyzing] = useState(false);
-  const [pendingData, setPendingData] = useState(null);
-  const [importing, setImporting] = useState(false);
   const [vocabSearch, setVocabSearch] = useState("");
   const [vocabFilterUsage, setVocabFilterUsage] = useState("");
   const [vocabFilterTopik, setVocabFilterTopik] = useState("");
@@ -42,8 +35,6 @@ export default function App() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const fileRef = useRef();
-  const chatEndRef = useRef();
 
   const showMsg = (text, type = "success") => {
     setMsg({ text, type });
@@ -158,26 +149,11 @@ export default function App() {
 
       {tab === "analyse" && (
         <AnalyseTab
-          photo={photo}
-          chatHistory={chatHistory}
-          analyzing={analyzing}
-          pendingData={pendingData}
-          importing={importing}
-          userInput={userInput}
-          fileRef={fileRef}
-          chatEndRef={chatEndRef}
-          onPhotoUpload={handlePhotoUpload}
-          onAnalyzePhoto={() => sendMessage("Analyse cette photo de mon manuel coréen.")}
-          onClearPhoto={() => {
-            setPhoto(null);
-            setPhotoB64(null);
-            setChatHistory([]);
-            setPendingData(null);
-            if (fileRef.current) fileRef.current.value = "";
-          }}
-          onSendMessage={sendMessage}
-          onImportToSupabase={importToSupabase}
-          setUserInput={setUserInput}
+          vocabData={vocabData}
+          gramData={gramData}
+          loadVocab={loadVocab}
+          loadGram={loadGram}
+          showMsg={showMsg}
         />
       )}
 
