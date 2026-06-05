@@ -3,6 +3,13 @@ import AnalyseTab from "./components/AnalyseTab";
 import VocabTab from "./components/VocabTab";
 import GramTab from "./components/GramTab";
 import { supabase, callGemini, SKILL_PROMPT, STATUTS } from "./lib/api";
+import {
+  loadVocabulary,
+  loadGrammar,
+  updateVocabularyField,
+  updateStatut,
+  deleteEntry
+} from "./services/databaseService";
 
 export default function App() {
   const [tab, setTab] = useState("analyse");
