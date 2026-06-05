@@ -2,7 +2,14 @@ import { useState, useRef, useEffect } from "react";
 import AnalyseTab from "./components/AnalyseTab";
 import VocabTab from "./components/VocabTab";
 import GramTab from "./components/GramTab";
-import { callGemini, SKILL_PROMPT, STATUTS } from "./lib/api";
+import { supabase, callGemini, SKILL_PROMPT, STATUTS } from "./lib/api";
+import {
+  loadVocabularyFromDb,
+  loadGrammarFromDb,
+  updateVocabularyFieldToDb,
+  updateStatutToDb,
+  deleteEntryToDb
+} from "./services/databaseService";
 
 export default function App() {
   const [tab, setTab] = useState("analyse");
