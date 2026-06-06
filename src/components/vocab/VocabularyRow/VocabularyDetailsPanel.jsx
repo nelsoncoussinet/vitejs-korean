@@ -1,4 +1,5 @@
-import {MultiTag} from "./../../Badge";
+import { MultiTag } from "./../../Badge";
+import MobileTranslationPanel from "./MobileTranslationPanel";
 
 export default function VocabularyDetailsPanel({
     r,
@@ -18,88 +19,34 @@ export default function VocabularyDetailsPanel({
                 {/* Details grid */}
                 <div className="vocab-details-grid" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, fontSize: 13 }}>
                     {isMobile && (
-                        <div>
-                            <div style={{ fontSize: 11, color: "#888", marginBottom: 4 }}>Traduction FR</div>
-                            {editingField?.id === r.id && editingField?.field === "fr-panel" ? (
-                                <div style={{ display: "flex", gap: 6 }}>
-                                    <textarea
-                                        value={editValue}
-                                        onChange={(e) => setEditValue(e.target.value)}
-                                        rows={3}
-                                        style={{ flex: 1, padding: "6px 8px", borderRadius: 6, border: "1px solid #ccc", fontSize: 13, resize: "vertical" }}
-                                    />
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                        <button style={btnStyle("primary")} disabled={saving} onClick={() => saveField(r.id, "fr", editValue)}>
-                                            ✓
-                                        </button>
-                                        <button style={btnStyle()} onClick={() => setEditingField(null)}>
-                                            ✕
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => {
-                                        setEditingField({ id: r.id, field: "fr-panel" });
-                                        setEditValue(r.fr || "");
-                                    }}
-                                    style={{ cursor: "text", padding: "6px 8px", borderRadius: 6, border: "1px dashed #ddd", minHeight: 40, background: "#fff" }}
-                                >
-                                    {parseDefinitions(r.fr).length > 1
-                                        ? parseDefinitions(r.fr).map((d, i) => (
-                                            <div key={i}>
-                                                <span style={{ color: "#aaa", marginRight: 4 }}>
-                                                    ({i + 1})
-                                                </span>
-                                                {d}
-                                            </div>
-                                        ))
-                                        : <span>{r.fr || <span style={{ color: "#bbb" }}>—</span>}</span>}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    {isMobile && (
-                        <div>
-                            <div style={{ fontSize: 11, color: "#888", marginBottom: 4 }}>Traduction EN</div>
-                            {editingField?.id === r.id && editingField?.field === "en-panel" ? (
-                                <div style={{ display: "flex", gap: 6 }}>
-                                    <textarea
-                                        value={editValue}
-                                        onChange={(e) => setEditValue(e.target.value)}
-                                        rows={3}
-                                        style={{ flex: 1, padding: "6px 8px", borderRadius: 6, border: "1px solid #ccc", fontSize: 13, resize: "vertical" }}
-                                    />
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                        <button style={btnStyle("primary")} disabled={saving} onClick={() => saveField(r.id, "en", editValue)}>
-                                            ✓
-                                        </button>
-                                        <button style={btnStyle()} onClick={() => setEditingField(null)}>
-                                            ✕
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => {
-                                        setEditingField({ id: r.id, field: "en-panel" });
-                                        setEditValue(r.en || "");
-                                    }}
-                                    style={{ cursor: "text", padding: "6px 8px", borderRadius: 6, border: "1px dashed #ddd", minHeight: 40, background: "#fff" }}
-                                >
-                                    {parseDefinitions(r.en).length > 1
-                                        ? parseDefinitions(r.en).map((d, i) => (
-                                            <div key={i}>
-                                                <span style={{ color: "#aaa", marginRight: 4 }}>
-                                                    ({i + 1})
-                                                </span>
-                                                {d}
-                                            </div>
-                                        ))
-                                        : <span>{r.en || <span style={{ color: "#bbb" }}>—</span>}</span>}
-                                </div>
-                            )}
-                        </div>
+                        <>
+                            <MobileTranslationPanel
+                                lang="fr"
+                                label="Traduction FR"
+                                value={r.fr}
+                                rowId={r.id}
+                                editingField={editingField}
+                                editValue={editValue}
+                                setEditValue={setEditValue}
+                                setEditingField={setEditingField}
+                                saveField={saveField}
+                                saving={saving}
+                                btnStyle={btnStyle}
+                            />
+                            <MobileTranslationPanel
+                                lang="en"
+                                label="Translation EN"
+                                value={r.en}
+                                rowId={r.id}
+                                editingField={editingField}
+                                editValue={editValue}
+                                setEditValue={setEditValue}
+                                setEditingField={setEditingField}
+                                saveField={saveField}
+                                saving={saving}
+                                btnStyle={btnStyle}
+                            />
+                        </>
                     )}
                     {r.definition_kr && (
                         <div>
