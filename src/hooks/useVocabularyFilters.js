@@ -36,4 +36,4 @@ export default function useVocabularyFilters(vocabData) {
     vocabFilterStatut,
     setVocabFilterStatut,
   };
-}x
+}
