@@ -10,23 +10,48 @@ import {
   updateStatutToDb,
   deleteEntryToDb
 } from "./services/databaseService";
+import useVocabularyFilters from "./hooks/useVocabularyFilters";
+import useGrammarFilters from "./hooks/useGrammarFilters";
 
 export default function App() {
   const [tab, setTab] = useState("analyse");
   const [vocabData, setVocabData] = useState([]);
   const [gramData, setGramData] = useState([]);
   const [msg, setMsg] = useState(null);
-  const [vocabSearch, setVocabSearch] = useState("");
-  const [vocabFilterUsage, setVocabFilterUsage] = useState("");
-  const [vocabFilterTopik, setVocabFilterTopik] = useState("");
-  const [vocabFilterStatut, setVocabFilterStatut] = useState("");
-  const [gramSearch, setGramSearch] = useState("");
-  const [gramFilterCat, setGramFilterCat] = useState("");
-  const [gramFilterStatut, setGramFilterStatut] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
   const [editingField, setEditingField] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const {
+  filteredVocab,
+  allUsages,
+
+  vocabSearch,
+  setVocabSearch,
+
+  vocabFilterUsage,
+  setVocabFilterUsage,
+
+  vocabFilterTopik,
+  setVocabFilterTopik,
+
+  vocabFilterStatut,
+  setVocabFilterStatut,
+} = useVocabularyFilters(vocabData);
+const {
+  filteredGram,
+
+  gramSearch,
+  setGramSearch,
+
+  gramFilterCat,
+  setGramFilterCat,
+
+  gramFilterStatut,
+  setGramFilterStatut,
+} = useGrammarFilters(gramData);
+
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const pointerDownY = useRef(0);
 
@@ -92,23 +117,6 @@ export default function App() {
       setSaving(false);
     }
   };
-
-  const allUsages = [...new Set(vocabData.flatMap((r) => (r.usage ? r.usage.split("|").map((t) => t.trim()) : [])))].sort();
-
-  const filteredVocab = vocabData.filter((r) => {
-    if (vocabSearch && !r.mot?.toLowerCase().includes(vocabSearch.toLowerCase()) && !r.fr?.toLowerCase().includes(vocabSearch.toLowerCase())) return false;
-    if (vocabFilterUsage && !r.usage?.split("|").map((t) => t.trim()).includes(vocabFilterUsage)) return false;
-    if (vocabFilterTopik && String(r.topik_objectif) !== vocabFilterTopik) return false;
-    if (vocabFilterStatut && r.statut !== vocabFilterStatut) return false;
-    return true;
-  });
-
-  const filteredGram = gramData.filter((r) => {
-    if (gramSearch && !r.grammaire?.toLowerCase().includes(gramSearch.toLowerCase()) && !r.definition_fr?.toLowerCase().includes(gramSearch.toLowerCase())) return false;
-    if (gramFilterCat && !r.categorie?.includes(gramFilterCat)) return false;
-    if (gramFilterStatut && r.statut !== gramFilterStatut) return false;
-    return true;
-  });
 
   return (
     <div className="app-shell">
