@@ -50,48 +50,48 @@ export default function VocabTab({
   const [tableScale, setTableScale] = useState(1);
   const [debugInfo, setDebugInfo] = useState(null);
   const [columnWidths, setColumnWidths] = useState([]);
+  const [debugHistory, setDebugHistory] = useState([]);
+  const debugCounter = useRef(0);
 
   /* Add zoom / unzoom effect */
+  const updateScale = () => {
+    if (!isMobile || !tableRef.current) {
+      setTableScale(1);
+      return;
+    }
+
+    const tableWidth = tableRef.current.scrollWidth;
+    const viewportWidth = window.innerWidth - 32;
+    const wrapperWidth = tableRef.current.parentElement?.offsetWidth;
+
+    const scale = Math.min(1, viewportWidth / tableWidth);
+
+    debugCounter.current++;
+
+    const line =
+      `#${debugCounter.current}` +
+      ` [${performance.now().toFixed(0)}]` +
+      ` rows=${filteredVocab.length}` +
+      ` | vp=${viewportWidth}` +
+      ` | wrap=${wrapperWidth}` +
+      ` | table=${tableWidth}` +
+      ` | scale=${scale.toFixed(3)}`;
+
+    setDebugHistory((prev) => [...prev, line].slice(-20));
+
+    setTableScale(scale);
+  };
+
   useEffect(() => {
-    const updateScale = () => {
-      if (!isMobile || !tableRef.current) {
-        setTableScale(1);
-        return;
-      }
-
-      const tableWidth = tableRef.current.scrollWidth;
-      const viewportWidth = window.innerWidth - 32;
-      const wrapperWidth = tableRef.current.parentElement?.offsetWidth;
-
-      const scale = Math.min(1, viewportWidth / tableWidth);
-
-      const firstRow = tableRef.current.querySelector("tbody tr");
-
-      if (firstRow) {
-        const cells = firstRow.querySelectorAll("td");
-
-        const widths = [...cells].map((cell, index) => ({
-          index,
-          width: Math.round(cell.getBoundingClientRect().width),
-        }));
-
-        setColumnWidths(widths);
-      }
-
-      setDebugInfo({
-        viewportWidth,
-        wrapperWidth,
-        tableWidth,
-        scale,
-      });
-
-      setTableScale(scale);
-    };
+    debugCounter.current = 0;
+    setDebugHistory([]);
 
     updateScale();
-    const t1 = setTimeout(updateScale, 5000);
-    const t2 = setTimeout(updateScale, 5000);
+
+    const t1 = setTimeout(updateScale, 100);
+    const t2 = setTimeout(updateScale, 500);
     const t3 = setTimeout(updateScale, 1000);
+
     window.addEventListener("resize", updateScale);
 
     return () => {
@@ -143,7 +143,7 @@ export default function VocabTab({
         TopikBadge={TopikBadge}
         MultiTag={MultiTag}
       />
-      {debugInfo && (
+      {debugHistory.length > 0 && (
         <div
           style={{
             marginBottom: 12,
@@ -154,20 +154,13 @@ export default function VocabTab({
             fontFamily: "monospace",
             textAlign: "left",
             background: "#fafafa",
+            maxHeight: 200,
+            overflowY: "auto",
+            whiteSpace: "pre-wrap",
           }}
         >
-          <div>viewport: {debugInfo.viewportWidth}</div>
-          <div>wrapper: {debugInfo.wrapperWidth}</div>
-          <div>table: {debugInfo.tableWidth}</div>
-          <div>scale: {debugInfo.scale.toFixed(3)}</div>
-          <div>time: {debugInfo.time}</div>
-
-          <hr />
-
-          {columnWidths.map((c) => (
-            <div key={c.index}>
-              col {c.index}: {c.width}px
-            </div>
+          {debugHistory.map((line, i) => (
+            <div key={i}>{line}</div>
           ))}
         </div>
       )}
