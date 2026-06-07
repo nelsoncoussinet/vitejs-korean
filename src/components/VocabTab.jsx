@@ -51,14 +51,25 @@ export default function VocabTab({
 
   /* Add zoom / unzoom effect */
   useEffect(() => {
-    updateScale();
+    const updateScale = () => {
+      if (!isMobile || !tableRef.current) {
+        setTableScale(1);
+        return;
+      }
 
-    const timer = setTimeout(updateScale, 0);
+      const tableWidth = tableRef.current.scrollWidth;
+      const viewportWidth = window.innerWidth - 32; // marge sécurité
+
+      const scale = Math.min(1, viewportWidth / tableWidth);
+
+      setTableScale(scale);
+    };
+
+  updateScale();
 
     window.addEventListener("resize", updateScale);
 
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("resize", updateScale);
     };
   }, [isMobile, filteredVocab]);
