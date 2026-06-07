@@ -49,6 +49,7 @@ export default function VocabTab({
   const tableRef = useRef(null);
   const [tableScale, setTableScale] = useState(1);
   const [debugInfo, setDebugInfo] = useState(null);
+  const [columnWidths, setColumnWidths] = useState([]);
 
   /* Add zoom / unzoom effect */
   useEffect(() => {
@@ -60,14 +61,27 @@ export default function VocabTab({
 
       const tableWidth = tableRef.current.scrollWidth;
       const viewportWidth = window.innerWidth - 32;
+      const wrapperWidth = tableRef.current.parentElement?.offsetWidth;
 
-  const wrapperWidth = tableRef.current.parentElement?.offsetWidth;
       const scale = Math.min(1, viewportWidth / tableWidth);
+
+      const firstRow = tableRef.current.querySelector("tbody tr");
+
+      if (firstRow) {
+        const cells = firstRow.querySelectorAll("td");
+
+        const widths = [...cells].map((cell, index) => ({
+          index,
+          width: Math.round(cell.getBoundingClientRect().width),
+        }));
+
+        setColumnWidths(widths);
+      }
 
       setDebugInfo({
         viewportWidth,
-        tableWidth,
         wrapperWidth,
+        tableWidth,
         scale,
       });
 
@@ -183,9 +197,17 @@ export default function VocabTab({
               }}
             >
               <div>viewportWidth: {debugInfo.viewportWidth}</div>
-              <div>tableWidth: {debugInfo.tableWidth}</div>
               <div>wrapperWidth: {debugInfo.wrapperWidth}</div>
+              <div>tableWidth: {debugInfo.tableWidth}</div>
               <div>scale: {debugInfo.scale}</div>
+
+              <hr />
+
+              {columnWidths.map((c) => (
+                <div key={c.index}>
+                  Colonne {c.index}: {c.width}px
+                </div>
+              ))}
             </div>
           )}
         </div>
