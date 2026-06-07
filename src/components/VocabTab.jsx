@@ -48,56 +48,17 @@ export default function VocabTab({
   const tdStyle = { padding: isMobile ? "6px 4px" : "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
   const tableRef = useRef(null);
   const [tableScale, setTableScale] = useState(1);
-  const [debugInfo, setDebugInfo] = useState(null);
-  const [columnWidths, setColumnWidths] = useState([]);
-  const [debugHistory, setDebugHistory] = useState([]);
-  const debugCounter = useRef(0);
 
   /* Add zoom / unzoom effect */
-  const updateScale = () => {
-    if (!isMobile || !tableRef.current) {
-      setTableScale(1);
-      return;
-    }
-
-    const tableWidth = tableRef.current.scrollWidth;
-    const viewportWidth = window.innerWidth - 32;
-    const wrapperWidth = tableRef.current.parentElement?.offsetWidth;
-
-    const scale = Math.min(1, viewportWidth / tableWidth);
-
-    debugCounter.current++;
-
-    const line =
-      `#${debugCounter.current}` +
-      ` [${performance.now().toFixed(0)}]` +
-      ` rows=${filteredVocab.length}` +
-      ` | vp=${viewportWidth}` +
-      ` | wrap=${wrapperWidth}` +
-      ` | table=${tableWidth}` +
-      ` | scale=${scale.toFixed(3)}`;
-
-    setDebugHistory((prev) => [...prev, line].slice(-20));
-
-    setTableScale(scale);
-  };
-
   useEffect(() => {
-    debugCounter.current = 0;
-    setDebugHistory([]);
-
     updateScale();
 
-    const t1 = setTimeout(updateScale, 100);
-    const t2 = setTimeout(updateScale, 500);
-    const t3 = setTimeout(updateScale, 1000);
+    const timer = setTimeout(updateScale, 0);
 
     window.addEventListener("resize", updateScale);
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+      clearTimeout(timer);
       window.removeEventListener("resize", updateScale);
     };
   }, [isMobile, filteredVocab]);
@@ -143,30 +104,9 @@ export default function VocabTab({
         TopikBadge={TopikBadge}
         MultiTag={MultiTag}
       />
-      {debugHistory.length > 0 && (
-        <div
-          style={{
-            marginBottom: 12,
-            padding: 8,
-            border: "1px solid #ddd",
-            borderRadius: 8,
-            fontSize: 11,
-            fontFamily: "monospace",
-            textAlign: "left",
-            background: "#fafafa",
-            maxHeight: 200,
-            overflowY: "auto",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {debugHistory.map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
-        </div>
-      )}
       {/* ============ VOCAB_TABLE ============ */}
       <div className="vocab-table-container" style={{ overflow: "hidden", border: "1px solid #e0e0e0", borderRadius: 10 }}>
-        <div style={{ transform: `scale(${tableScale})`, transformOrigin: "top left", width: "fit-content" }}>
+        <div style={{ transform: `scale(${tableScale})`, transformOrigin: "top left", width: `${100 / tableScale}%`, }}>
           <table ref={tableRef} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             {/* Table header */}
             <thead>

@@ -73,8 +73,8 @@ export default function VocabularyRow({
                 {!isMobile && <td style={tdStyle}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>}
                 {!isMobile && <td style={tdStyle}><MultiTag val={r.usage} small={isMobile} /></td>}
                 {!isMobile && <td style={tdStyle}><MultiTag val={r.theme} small={isMobile} /></td>}
-                <td style={tdStyle}>
-                    <div style={{ display: "flex", gap: 4 }}>
+                <td style={{...tdStyle, width: 50, minWidth: 50, whiteSpace: "nowrap"}}>
+                    <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 2}}>
                         {!isMobile && (
                             <>
                                 {editingField?.id === r.id && editingField?.field === "both" ? (
