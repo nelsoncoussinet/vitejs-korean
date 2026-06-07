@@ -76,7 +76,7 @@ export default function GramTab({
       </div>
 
       <div style={{ overflowX: "auto", border: "1px solid #e0e0e0", borderRadius: 10 }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, tableLayout: "fixed" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "#fafafa" }}>
               {["Grammaire", "Catégorie", "Sous-cat.", "Définition FR", "Oral/Écrit", "Niveau", "TOPIK", "Statut", ""].map((h) => (
