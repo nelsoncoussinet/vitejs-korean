@@ -118,11 +118,11 @@ export default function VocabTab({
       {/* ============ VOCAB_TABLE ============ */}
       <div className="vocab-table-container" style={{ overflow: "hidden", border: "1px solid #e0e0e0", borderRadius: 10 }}>
         <div style={{ transform: `scale(${tableScale})`, transformOrigin: "top left", width: `${100 / tableScale}%`, }}>
-          <table ref={tableRef} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table ref={tableRef} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, tableLayout: "fixed" }}>
             {/* Table header */}
             <thead>
               <tr style={{ background: "#fafafa" }}>
-                {(isMobile ? ["Mot", "FR", "EN", ""] : ["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""]).map((h) => (
+                {(isMobile ? ["Mot", "FR", "EN", "ACT"] : ["Mot", "Type", "FR", "EN", "Niveau", "Usage", "Thème", ""]).map((h) => (
                   <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 500, fontSize: 12, color: "#888", borderBottom: "1px solid #e0e0e0", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
