@@ -48,6 +48,7 @@ export default function VocabTab({
   const tdStyle = { padding: isMobile ? "6px 4px" : "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
   const tableRef = useRef(null);
   const [tableScale, setTableScale] = useState(1);
+  const [debugInfo, setDebugInfo] = useState(null);
 
   /* Add zoom / unzoom effect */
   useEffect(() => {
@@ -58,9 +59,17 @@ export default function VocabTab({
       }
 
       const tableWidth = tableRef.current.scrollWidth;
-      const viewportWidth = window.innerWidth - 32; // marge sécurité
+      const viewportWidth = window.innerWidth - 32;
 
+  const wrapperWidth = tableRef.current.parentElement?.offsetWidth;
       const scale = Math.min(1, viewportWidth / tableWidth);
+
+      setDebugInfo({
+        viewportWidth,
+        tableWidth,
+        wrapperWidth,
+        scale,
+      });
 
       setTableScale(scale);
     };
@@ -118,7 +127,7 @@ export default function VocabTab({
 
       {/* ============ VOCAB_TABLE ============ */}
       <div className="vocab-table-container" style={{ overflow: "hidden", border: "1px solid #e0e0e0", borderRadius: 10 }}>
-        <div style={{ transform: `scale(${tableScale})`, transformOrigin: "top left", width: `${100 / tableScale}%` }}>
+        <div style={{ transform: `scale(${tableScale})`, transformOrigin: "top left", width: "fit-content" }}>
           <table ref={tableRef} style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             {/* Table header */}
             <thead>
@@ -160,6 +169,25 @@ export default function VocabTab({
               )}
             </tbody>
           </table>
+          {debugInfo && (
+            <div
+              style={{
+                marginTop: 16,
+                padding: 12,
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                fontSize: 12,
+                textAlign: "left",
+                fontFamily: "monospace",
+                background: "#fafafa",
+              }}
+            >
+              <div>viewportWidth: {debugInfo.viewportWidth}</div>
+              <div>tableWidth: {debugInfo.tableWidth}</div>
+              <div>wrapperWidth: {debugInfo.wrapperWidth}</div>
+              <div>scale: {debugInfo.scale}</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
