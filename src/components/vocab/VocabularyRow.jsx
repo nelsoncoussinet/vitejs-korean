@@ -73,8 +73,8 @@ export default function VocabularyRow({
                 {!isMobile && <td style={tdStyle}><TopikBadge v={r.topik_objectif} small={isMobile} /></td>}
                 {!isMobile && <td style={tdStyle}><MultiTag val={r.usage} small={isMobile} /></td>}
                 {!isMobile && <td style={tdStyle}><MultiTag val={r.theme} small={isMobile} /></td>}
-                <td style={{...tdStyle, width: 60, minWidth: 60}}>
-                    <div style={{display: "flex", flexDirection: "row", gap: 2, justifyContent: "center"}}>
+                <td style={{...tdStyle, width: 35, minWidth: 35}}>
+                    <div style={{display: "flex", flexDirection: isMobile ? "column" : "row", gap: 2, justifyContent: "center"}}>
                         {!isMobile && (
                             <>
                                 {editingField?.id === r.id && editingField?.field === "both" ? (
@@ -120,7 +120,7 @@ export default function VocabularyRow({
                             </>
                         )}
                         <button
-                            style={{ ...btnStyle(), padding: isMobile ? "2px 4px" : "3px 8px", fontSize: 10 }}
+                            style={{ ...btnStyle(), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 10 }}
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -130,7 +130,7 @@ export default function VocabularyRow({
                             ↻
                         </button>
                         <button
-                            style={{ ...btnStyle("danger"), padding: isMobile ? "2px 4px" : "3px 8px", fontSize: 10 }}
+                            style={{ ...btnStyle("danger"), padding: isMobile ? "2px 5px" : "3px 8px", fontSize: 10 }}
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={(e) => {
                                 e.stopPropagation();

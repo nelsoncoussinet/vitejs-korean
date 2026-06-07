@@ -48,7 +48,7 @@ export default function VocabTab({
   const tdStyle = { padding: isMobile ? "6px 4px" : "10px 12px", borderBottom: "1px solid #f0f0f0", verticalAlign: "middle" };
   const tableRef = useRef(null);
   const [tableScale, setTableScale] = useState(1);
-
+const [debugInfo, setDebugInfo] = useState("");
   /* Add zoom / unzoom effect */
   useEffect(() => {
     const updateScale = () => {
@@ -61,7 +61,14 @@ export default function VocabTab({
       const viewportWidth = window.innerWidth - 32; // marge sécurité
 
       const scale = Math.min(1, viewportWidth / tableWidth);
+const widths = [...tableRef.current.rows[0].cells]
+  .map(c => Math.round(c.getBoundingClientRect().width));
 
+setDebugInfo(
+  `cols=${widths.join(", ")} | ` +
+  `vp=${viewportWidth} | ` +
+  `table=${tableWidth} | ` +
+  `scale=${scale.toFixed(3)}`);
       setTableScale(scale);
     };
 
@@ -90,7 +97,21 @@ export default function VocabTab({
           </div>
         ))}
       </div>
-
+{debugInfo && (
+  <div
+    style={{
+      position: "sticky",
+      top: 0,
+      zIndex: 999,
+      background: "#ffffcc",
+      padding: "4px",
+      fontSize: "11px",
+      border: "1px solid #ccc",
+    }}
+  >
+    {debugInfo}
+  </div>
+)}
       {/* ============ VOCAB_FILTERS ============ */}
       <VocabularyFilters
         vocabSearch={vocabSearch}
