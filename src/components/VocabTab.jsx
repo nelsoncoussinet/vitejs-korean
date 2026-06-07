@@ -89,10 +89,15 @@ export default function VocabTab({
     };
 
     updateScale();
-
+    const t1 = setTimeout(updateScale, 5000);
+    const t2 = setTimeout(updateScale, 5000);
+    const t3 = setTimeout(updateScale, 1000);
     window.addEventListener("resize", updateScale);
 
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       window.removeEventListener("resize", updateScale);
     };
   }, [isMobile, filteredVocab]);
@@ -138,7 +143,34 @@ export default function VocabTab({
         TopikBadge={TopikBadge}
         MultiTag={MultiTag}
       />
+      {debugInfo && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: 8,
+            border: "1px solid #ddd",
+            borderRadius: 8,
+            fontSize: 11,
+            fontFamily: "monospace",
+            textAlign: "left",
+            background: "#fafafa",
+          }}
+        >
+          <div>viewport: {debugInfo.viewportWidth}</div>
+          <div>wrapper: {debugInfo.wrapperWidth}</div>
+          <div>table: {debugInfo.tableWidth}</div>
+          <div>scale: {debugInfo.scale.toFixed(3)}</div>
+          <div>time: {debugInfo.time}</div>
 
+          <hr />
+
+          {columnWidths.map((c) => (
+            <div key={c.index}>
+              col {c.index}: {c.width}px
+            </div>
+          ))}
+        </div>
+      )}
       {/* ============ VOCAB_TABLE ============ */}
       <div className="vocab-table-container" style={{ overflow: "hidden", border: "1px solid #e0e0e0", borderRadius: 10 }}>
         <div style={{ transform: `scale(${tableScale})`, transformOrigin: "top left", width: "fit-content" }}>
@@ -183,33 +215,6 @@ export default function VocabTab({
               )}
             </tbody>
           </table>
-          {debugInfo && (
-            <div
-              style={{
-                marginTop: 16,
-                padding: 12,
-                border: "1px solid #ccc",
-                borderRadius: 8,
-                fontSize: 12,
-                textAlign: "left",
-                fontFamily: "monospace",
-                background: "#fafafa",
-              }}
-            >
-              <div>viewportWidth: {debugInfo.viewportWidth}</div>
-              <div>wrapperWidth: {debugInfo.wrapperWidth}</div>
-              <div>tableWidth: {debugInfo.tableWidth}</div>
-              <div>scale: {debugInfo.scale}</div>
-
-              <hr />
-
-              {columnWidths.map((c) => (
-                <div key={c.index}>
-                  Colonne {c.index}: {c.width}px
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
