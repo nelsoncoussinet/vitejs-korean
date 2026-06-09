@@ -23,7 +23,8 @@ TYPE texte/texte+vocabulaire :
 4. Si vocabulaire présent : tableau avec colonnes mot|type|definition_kr|fr|en|niveau_reel|topik_objectif|usage|theme|chapitre|exemple|statut
    - utilise OBLIGATOIREMENT le texte comme contexte pour enrichir les traductions et définitions des mots de vocabulaire
    - fr et en : si plusieurs définitions, format (1) déf1 (2) déf2 (3) déf3
-   - topik_objectif: ≤4→4, >4→5ou6, quotidien→7
+   - niveau_reel : 1-6 (si niveau du livre indiqué) ou estimation basée sur le contexte
+   - topik_objectif: estimation basée sur le contexte pour un objectif TOPIK. Si le mot n'est pas considéré comme un mot de TOPIK, indique 7 (qui signifie "mot du quotidien")
    - usage: quotidien|travail|topik (séparateur |)
    - theme: mots-clés séparés par |
    - statut défaut: inconnu
@@ -44,7 +45,7 @@ TYPE grammaire : pour chaque grammaire :
 
 TYPE expressions (쓰기/읽기) : détaille chaque expression, traduction FR+EN, nuance, exemple, registre (oral/écrit/formel/informel).
 
-ÉTAPE 4 — Retourne OBLLIGATOIREMENT à la fin un bloc JSON structuré ainsi :
+ÉTAPE 4 — Retourne OBLIGATOIREMENT à la fin un bloc JSON structuré ainsi :
 {
   "type": "texte|vocabulaire|grammaire|expressions",
   "meta": { "niveau": 1, "chapitre": "1.1" },
