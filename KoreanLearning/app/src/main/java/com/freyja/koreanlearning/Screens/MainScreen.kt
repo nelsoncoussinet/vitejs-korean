@@ -37,12 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.freyja.koreanlearning.Data.IDatabaseClient
+import com.freyja.koreanlearning.Data.Mock.MockClient
 import com.freyja.koreanlearning.Data.Word
-import com.freyja.koreanlearning.MainActivity
 import com.freyja.koreanlearning.WordDetailScreen
 
-class MainScreenView(val mainActivity: MainActivity) : IScreen
+class MainScreenView(val database: IDatabaseClient) : IScreen
 {
     @Composable
     override fun Show() {
@@ -107,7 +109,7 @@ class MainScreenView(val mainActivity: MainActivity) : IScreen
 
         LaunchedEffect(Unit) {
             try {
-                val results = mainActivity.database.getAllWords()
+                val results = database.getAllWords()
                 words.clear()
                 words.addAll(results)
             } catch (e: Exception) {
@@ -187,4 +189,11 @@ class MainScreenView(val mainActivity: MainActivity) : IScreen
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun Preview()
+{
+    MainScreenView(MockClient()).Show()
 }

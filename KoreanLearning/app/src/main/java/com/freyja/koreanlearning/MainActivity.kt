@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -28,6 +29,7 @@ import com.freyja.koreanlearning.Data.SupabaseDatabaseClient
 import com.freyja.koreanlearning.Screens.CameraScreen
 import com.freyja.koreanlearning.Screens.GrammarScreen
 import com.freyja.koreanlearning.Screens.IScreen
+import com.freyja.koreanlearning.Screens.LibraryScreen
 import com.freyja.koreanlearning.Screens.MainScreenView
 import com.freyja.koreanlearning.ui.theme.KoreanLearningTheme
 
@@ -39,18 +41,17 @@ class MainActivity : ComponentActivity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val homeScreen = Screen("home", "Home", Icons.Default.Home, MainScreenView(this))
-        val grammarScreen = Screen("grammar", "Grammar", Icons.Default.Edit, GrammarScreen())
-        val cameraScreen = Screen("camera", "Camera", Icons.Outlined.AccountCircle, CameraScreen())
 
         enableEdgeToEdge()
         setContent {
             KoreanLearningTheme {
                 val navController = rememberNavController()
+                val homeScreen = Screen("home", "Home", Icons.Default.Home, MainScreenView(database))
                 val items = listOf(
                     homeScreen,
-                    grammarScreen,
-                    cameraScreen,
+                    Screen("grammar", "Grammar", Icons.Default.Edit, GrammarScreen(this)),
+                    Screen("camera", "Camera", Icons.Outlined.AccountCircle, CameraScreen(database)),
+                    Screen("library", "Library", Icons.Default.Menu, LibraryScreen()),
                 )
                 Scaffold(
                     bottomBar = {

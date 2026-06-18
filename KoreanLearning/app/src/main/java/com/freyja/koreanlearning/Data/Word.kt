@@ -7,10 +7,13 @@ import kotlinx.serialization.Serializable
 data class Word(
     //@SerialName("progression")
     //var progression: Int,
+
     @SerialName("mot")
     var original: String,
+
     @SerialName("fr")
     var translation: String,
+
     @SerialName("definition_kr")
     var example: String
 )

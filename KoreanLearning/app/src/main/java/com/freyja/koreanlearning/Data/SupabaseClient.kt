@@ -9,6 +9,9 @@ class SupabaseDatabaseClient : IDatabaseClient
 {
     var _instance: SupabaseClient? = null;
 
+    var words: List<Word>? = null
+    var grammars: List<Grammar>? = null
+
     private fun getClient(): SupabaseClient
     {
         if (_instance == null) {
@@ -24,9 +27,21 @@ class SupabaseDatabaseClient : IDatabaseClient
 
     override suspend fun getAllWords(): List<Word>
     {
-        return getClient()
-            .from("vocabulaire")
-            .select()
-            .decodeList<Word>()
+        if (words == null)
+            words = getClient()
+                .from("vocabulaire")
+                .select()
+                .decodeList<Word>()
+        return words!!
+    }
+
+    override suspend fun getAllGrammars(): List<Grammar>
+    {
+        if (grammars == null)
+            grammars = getClient()
+                .from("grammaire")
+                .select()
+                .decodeList<Grammar>()
+        return grammars!!
     }
 }
